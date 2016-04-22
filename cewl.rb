@@ -63,9 +63,9 @@
 # Licence:: CC-BY-SA 2.0 or GPL-3+
 #
 
-VERSION = "5.1"
+VERSION = "5.2 (Some Chaos)"
 
-puts"CeWL #{VERSION} Robin Wood (robin@digi.ninja) (http://digi.ninja)"
+puts"CeWL #{VERSION} Robin Wood (robin@digi.ninja) (https://digi.ninja)"
 puts
 
 begin
@@ -87,6 +87,10 @@ rescue LoadError => e
 		exit
 	end
 end
+
+# Doesn't work for some reason, maybe
+# because its bouncing into different classes
+trap("SIGINT") { throw :ctrl_c }
 
 require './cewl_lib'
 
@@ -217,7 +221,7 @@ class MySpiderInstance<SpiderInstance
 					exit
 				end
 			end
-			
+		
 			req = Net::HTTP::Get.new(uri.request_uri, @headers)
 			
 			if !@auth_type.nil?
@@ -245,13 +249,8 @@ class MySpiderInstance<SpiderInstance
 			if res.redirect?
 				#puts "redirect url"
 				base_url = uri.to_s[0, uri.to_s.rindex('/')]
-				u = construct_complete_url(base_url,res['Location'])
-				begin
-					new_url = URI.parse(u)
-				rescue URI::InvalidURIError
-					puts "Invalid URI #{u}" if @verbose
-					return
-				end
+				new_url = URI.parse(construct_complete_url(base_url,res['Location']))
+
 				# If auth is used then a name:pass@ gets added, this messes the tree
 				# up so easiest to just remove it
 				current_uri = uri.to_s.gsub(/:\/\/[^:]*:[^@]*@/, "://")
@@ -260,6 +259,13 @@ class MySpiderInstance<SpiderInstance
 				puts "Authentication required, can't continue on this branch - #{uri}" if @verbose
 			else
 				block.call(res)
+			end
+		rescue SocketError => e
+			puts "Couldn't hit the site moving on"
+		rescue NoMethodError => e
+			if @verbose
+				puts "Unable to process URL"
+				puts "Message is " + e.to_s
 			end
 		rescue  => e
 			puts "Unable to connect to the site, run in verbose mode for more information"
@@ -279,12 +285,7 @@ class MySpiderInstance<SpiderInstance
 		if additional_url =~ /^#/
 			return nil
 		end
-		begin
-			parsed_additional_url ||= URI.parse(additional_url)
-		rescue URI::InvalidURIError
-			puts "Invalid URI #{additional_url}" if @verbose
-			return nil
-		end
+		parsed_additional_url ||= URI.parse(additional_url)
 		case parsed_additional_url.scheme
 			when nil
 				u = base_url.is_a?(URI) ? base_url : URI.parse(base_url)
@@ -694,266 +695,291 @@ else
 	meta_outfile_file = outfile_file
 end
 
-begin
-	if verbose
-		puts "Starting at " + url
-	end
-
-	if !proxy_host.nil?
-		MySpider.proxy(proxy_host, proxy_port, proxy_username, proxy_password)
-	end
-
-	if !auth_type.nil?
-		MySpider.auth_creds(auth_type, auth_user, auth_pass)
-	end
-	MySpider.verbose(verbose)
-	
-	MySpider.start_at(url) do |s|
-		if ua!=nil
-			s.headers['User-Agent'] = ua
+catch :ctrl_c do
+	begin
+		if verbose
+			puts "Starting at " + url
 		end
 
-		s.add_url_check do |a_url|
-			#puts "checking page " + a_url
-			allow=true
-			# Extensions to ignore
-			if a_url =~ /(\.zip$|\.gz$|\.zip$|\.bz2$|\.png$|\.gif$|\.jpg$|^#)/
-				if verbose
-					puts "Ignoring internal link or graphic: "+a_url
-				end
-				allow=false
-			else
-				if /^mailto:(.*)/i.match(a_url)
-					if email
-						email_arr<<$1
-						if verbose
-							puts "Found #{$1} on page #{a_url}"
-						end
+		if !proxy_host.nil?
+			MySpider.proxy(proxy_host, proxy_port, proxy_username, proxy_password)
+		end
+
+		if !auth_type.nil?
+			MySpider.auth_creds(auth_type, auth_user, auth_pass)
+		end
+		MySpider.verbose(verbose)
+		
+		MySpider.start_at(url) do |s|
+			if ua!=nil
+				s.headers['User-Agent'] = ua
+			end
+
+			s.add_url_check do |a_url|
+				allow=true
+				# Extensions to ignore
+				if a_url =~ /(\.zip$|\.gz$|\.zip$|\.bz2$|\.png$|\.gif$|\.jpg$|^#)/
+					if verbose
+						puts "Ignoring internal link or graphic: "+a_url
 					end
 					allow=false
 				else
-					if !offsite
-						a_url_parsed = URI.parse(a_url)
-						url_parsed = URI.parse(url)
-#							puts 'comparing ' + a_url + ' with ' + url
-
-						allow = (a_url_parsed.host == url_parsed.host)
-
-						if !allow && verbose
-							puts "Offsite link, not following: "+a_url
-						end
-					end
-				end
-			end
-			allow
-		end
-
-		s.on :success do |a_url, resp, prior_url|
-
-			if verbose
-				if prior_url.nil?
-					puts "Visiting: #{a_url}, got response code #{resp.code}"
-				else
-					puts "Visiting: #{a_url} referred from #{prior_url}, got response code #{resp.code}"
-				end
-			end
-			html=resp.body.to_s.force_encoding("UTF-8")
-			html.encode!('UTF-16', 'UTF-8', :invalid => :replace, :replace => '')
-			html.encode!('UTF-8', 'UTF-16')
-			
-			dom = Nokogiri.HTML(html)
-			dom.css('script').remove if strip_js
-			dom.css('style').remove if strip_css
-			body = dom.to_s
-
-			# get meta data
-			if /.*<meta.*description.*content\s*=[\s'"]*(.*)/i.match(body)
-				description=$1
-				body += description.gsub(/[>"\/']*/, "") 
-			end 
-
-			if /.*<meta.*keywords.*content\s*=[\s'"]*(.*)/i.match(body)
-				keywords=$1
-				body += keywords.gsub(/[>"\/']*/, "") 
-			end 
-
-#				puts body
-#				while /mailto:([^'">]*)/i.match(body)
-#					email_arr<<$1
-#					if verbose
-#						puts "Found #{$1} on page #{a_url}"
-#					end
-#				end 
-
-			while /(location.href\s*=\s*["']([^"']*)['"];)/i.match(body)
-				full_match = $1
-				j_url = $2
-				if verbose
-					puts "Javascript redirect found " + j_url
-				end
-
-				re = Regexp.escape(full_match)
-
-				body.gsub!(/#{re}/,"")
-
-				if j_url !~ /https?:\/\//i
-
-# Broken, needs real domain adding here
-# http://docs.seattlerb.org/net-http-digest_auth/Net/HTTP/DigestAuth.html
-
-					domain = "http://ninja.dev/"
-					j_url = domain + j_url
-					if verbose
-						puts "Relative URL found, adding domain to make " + j_url
-					end
-				end
-
-				x = {a_url=>j_url}
-				url_stack.push x
-			end
-
-			# strip comment tags
-			body.gsub!(/<!--/, "")
-			body.gsub!(/-->/, "")
-
-			# If you want to add more attribute names to include, just add them to this array
-			attribute_names = [
-								"alt",
-								"title",
-							]
-
-			attribute_text = ""
-
-			attribute_names.each { |attribute_name|
-				body.gsub!(/#{attribute_name}="([^"]*)"/) { |attr| attribute_text += $1 + " " }
-			}
-
-			if verbose
-				puts "Attribute text found:"
-				puts attribute_text
-				puts
-			end
-
-			body += " " + attribute_text
-
-			# strip html tags
-			words=body.gsub(/<\/?[^>]*>/, "") 
-
-			# check if this is needed
-			words.gsub!(/&[a-z]*;/, "") 
-
-			# may want 0-9 in here as well in the future but for now limit it to a-z so
-			# you can't sneak any nasty characters in
-			if /.*\.([a-z]+)(\?.*$|$)/i.match(a_url)
-				file_extension=$1
-			else
-				file_extension=""
-			end
-
-			if meta
-				begin
-					if keep and file_extension =~ /^((doc|dot|ppt|pot|xls|xlt|pps)[xm]?)|(ppam|xlsb|xlam|pdf|zip|gz|zip|bz2)$/
-						if /.*\/(.*)$/.match(a_url)
-							output_filename=meta_temp_dir+$1
-							if verbose
-								puts "Keeping " + output_filename
-							end
-						else
-							# shouldn't ever get here as the regex above should always be able to pull the filename out of the url, 
-							# but just in case
-							output_filename=meta_temp_dir+"cewl_tmp"
-							output_filename += "."+file_extension unless file_extension==""
-						end
-					else
-						output_filename=meta_temp_dir+"cewl_tmp"
-						output_filename += "."+file_extension unless file_extension==""
-					end
-					out=File.new(output_filename, "w")
-					out.print(resp.body)
-					out.close
-
-					meta_data=process_file(output_filename, verbose)
-					if(meta_data!=nil)
-						usernames+=meta_data
-					end
-				rescue => e
-					puts "Couldn't open the meta temp file for writing - " + e.inspect
-					exit
-				end
-			end
-
-			# don't get words from these file types. Most will have been blocked by the url_check function but
-			# some are let through, such as .css, so that they can be checked for email addresses
-
-			# this is a bad way to do this but it is either white or black list extensions and 
-			# the list of either is quite long, may as well black list and let extra through
-			# that can then be weeded out later than stop things that could be useful
-			begin
-				if file_extension !~ /^((doc|dot|ppt|pot|xls|xlt|pps)[xm]?)|(ppam|xlsb|xlam|pdf|zip|gz|zip|bz2|css|png|gif|jpg|#)$/
-					begin
+					if /^mailto:(.*)/i.match(a_url)
 						if email
-							# Split the file down based on the email address regexp
-							#words.gsub!(/\b([A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4})\b/i)
-							#p words
-
-							# If you want to pull email addresses from the contents of files found, such as word docs then move
-							# this block outside the if statement
-							# I've put it in here as some docs contain email addresses that have nothing to do with the target
-							# so give false positive type results
-							words.each_line do |word|
-								while /\b([A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4})\b/i.match(word)
-									if verbose
-										puts "Found #{$1} on page #{a_url}"
-									end
-									email_arr<<$1
-									word=word.gsub(/#{$1}/, "")
-								end
+							email_arr<<$1
+							if verbose
+								puts "Found #{$1} on page #{a_url}"
 							end
 						end
-					rescue => e
-						puts "There was a problem generating the email list"
-						puts "Error: " + e.inspect
-						puts e.backtrace
-					end
-				
-					if wordlist
-						# remove any symbols
-						words.gsub!(/[^[:alpha:]]/i," ")
-						# add to the array
-						words.split(" ").each do |word|
-							if word.length >= min_word_length
-								if !word_hash.has_key?(word)
-									word_hash[word] = 0
-								end
-								word_hash[word] += 1
+						allow=false
+					else
+						if !offsite
+							a_url_parsed = URI.parse(a_url)
+							url_parsed = URI.parse(url)
+	#							puts 'comparing ' + a_url + ' with ' + url
+
+							allow = (a_url_parsed.host == url_parsed.host)
+
+							if !allow && verbose
+								puts "Offsite link, not following: " + a_url
 							end
 						end
 					end
 				end
-			rescue => e
-				puts "There was a problem handling word generation"
-				puts "Error: " + e.inspect
+				allow
 			end
-		end
-		s.store_next_urls_with url_stack
 
+			s.on :success do |a_url, resp, prior_url|
+
+				if verbose
+					if prior_url.nil?
+						puts "Visiting: #{a_url}, got response code #{resp.code}"
+					else
+						puts "Visiting: #{a_url} referred from #{prior_url}, got response code #{resp.code}"
+					end
+				end
+
+				# may want 0-9 in here as well in the future but for now limit it to a-z so
+				# you can't sneak any nasty characters in
+				if /.*\.([a-z]+)(\?.*$|$)/i.match(a_url)
+					file_extension=$1
+				else
+					file_extension=""
+				end
+
+					# don't get words from these file types. Most will have been blocked by the url_check function but
+					# some are let through, such as .css, so that they can be checked for email addresses
+
+					# this is a bad way to do this but it is either white or black list extensions and 
+					# the list of either is quite long, may as well black list and let extra through
+					# that can then be weeded out later than stop things that could be useful
+					
+				#if file_extension =~ /^((doc|dot|ppt|pot|xls|xlt|pps)[xm]?)|(ppam|xlsb|xlam|pdf|zip|gz|zip|bz2|css|png|gif|jpg|#)$/
+				if file_extension =~ /^((doc|dot|ppt|pot|xls|xlt|pps)[xm]?)|(ppam|xlsb|xlam|pdf|zip|gz|zip|bz2|png|gif|jpg|#)$/
+					if meta
+						begin
+							if keep and file_extension =~ /^((doc|dot|ppt|pot|xls|xlt|pps)[xm]?)|(ppam|xlsb|xlam|pdf|zip|gz|zip|bz2)$/
+								if /.*\/(.*)$/.match(a_url)
+									output_filename=meta_temp_dir+$1
+									if verbose
+										puts "Keeping " + output_filename
+									end
+								else
+									# shouldn't ever get here as the regex above should always be able to pull the filename out of the url, 
+									# but just in case
+
+									# Maybe look at doing this to make the tmp name
+									# require "tempfile"
+									# Dir::Tmpname.make_tmpname "a", "b"
+									#  => "a20150707-8694-hrrxr4-b" 
+									#
+									output_filename=meta_temp_dir+"cewl_tmp"
+									output_filename += "."+file_extension unless file_extension==""
+								end
+							else
+								output_filename=meta_temp_dir+"cewl_tmp"
+								output_filename += "."+file_extension unless file_extension==""
+							end
+							out=File.new(output_filename, "wb")
+							out.print(resp.body)
+							out.close
+
+							meta_data=process_file(output_filename, verbose)
+							if(meta_data!=nil)
+								usernames+=meta_data
+							end
+						rescue => e
+							puts "Couldn't open the meta temp file for writing - " + e.inspect
+							exit
+						end
+					end
+				else
+					html=resp.body.to_s.force_encoding("UTF-8")
+					html.encode!('UTF-16', 'UTF-8', :invalid => :replace, :replace => '')
+					html.encode!('UTF-8', 'UTF-16')
+					
+					dom = Nokogiri.HTML(html)
+					dom.css('script').remove if strip_js
+					dom.css('style').remove if strip_css
+					body = dom.to_s
+
+					# get meta data
+					if /.*<meta.*description.*content\s*=[\s'"]*(.*)/i.match(body)
+						description=$1
+						body += description.gsub(/[>"\/']*/, "") 
+					end 
+
+					if /.*<meta.*keywords.*content\s*=[\s'"]*(.*)/i.match(body)
+						keywords=$1
+						body += keywords.gsub(/[>"\/']*/, "") 
+					end 
+
+					# This bit will not normally fire as all JavaScript is stripped out
+					# by the Nokogiri remove a few lines before this.
+					#
+					# The code isn't perfect but will do a rough job of working out
+					# pages from relative location links
+					while /(location.href\s*=\s*["']([^"']*)['"];)/i.match(body)
+						full_match = $1
+						j_url = $2
+						if verbose
+							puts "Javascript redirect found " + j_url
+						end
+
+						re = Regexp.escape(full_match)
+
+						body.gsub!(/#{re}/,"")
+
+						if j_url !~ /https?:\/\//i
+							parsed = URI.parse(a_url)
+							protocol = parsed.scheme
+							host = parsed.host
+
+							domain = protocol + "://" + host
+
+							if j_url[0] == "/"
+								j_url = domain + j_url
+							else
+								if parsed.path =~ /(.*)\/.*/
+									j_url = domain + j_url + $1
+								else
+									j_url = domain + j_url
+								end
+							end
+								
+							if verbose
+								puts "Relative URL found, adding domain to make " + j_url
+							end
+						end
+
+						x = {a_url=>j_url}
+						url_stack.push x
+					end
+
+					# strip comment tags
+					body.gsub!(/<!--/, "")
+					body.gsub!(/-->/, "")
+
+					# If you want to add more attribute names to include, just add them to this array
+					attribute_names = [
+										"alt",
+										"title",
+									]
+
+					attribute_text = ""
+
+					attribute_names.each { |attribute_name|
+						body.gsub!(/#{attribute_name}="([^"]*)"/) { |attr| attribute_text += $1 + " " }
+					}
+
+					if verbose and attribute_text != ""
+						puts "Attribute text found:"
+						puts attribute_text
+						puts
+					end
+
+					body += " " + attribute_text
+
+					# strip html tags
+					words=body.gsub(/<\/?[^>]*>/, "") 
+
+					# check if this is needed
+					words.gsub!(/&[a-z]*;/, "") 
+
+					begin
+	#					if file_extension !~ /^((doc|dot|ppt|pot|xls|xlt|pps)[xm]?)|(ppam|xlsb|xlam|pdf|zip|gz|zip|bz2|css|png|gif|jpg|#)$/
+							begin
+								if email
+									# Split the file down based on the email address regexp
+									#words.gsub!(/\b([A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4})\b/i)
+									#p words
+
+									# If you want to pull email addresses from the contents of files found, such as word docs then move
+									# this block outside the if statement
+									# I've put it in here as some docs contain email addresses that have nothing to do with the target
+									# so give false positive type results
+									words.each_line do |word|
+										while /\b([A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4})\b/i.match(word)
+											if verbose
+												puts "Found #{$1} on page #{a_url}"
+											end
+											email_arr<<$1
+											word=word.gsub(/#{$1}/, "")
+										end
+									end
+								end
+							rescue => e
+								puts "There was a problem generating the email list"
+								puts "Error: " + e.inspect
+								puts e.backtrace
+							end
+						
+							if wordlist
+								# remove any symbols
+								words.gsub!(/[^[:alpha:]]/i," ")
+								# add to the array
+								words.split(" ").each do |word|
+									if word.length >= min_word_length
+										if !word_hash.has_key?(word)
+											word_hash[word] = 0
+										end
+										word_hash[word] += 1
+									end
+								end
+							end
+	#					end
+					rescue => e
+						puts "There was a problem handling word generation"
+						puts "Error: " + e.inspect
+					end
+				end
+			end
+			s.store_next_urls_with url_stack
+
+		end
+	rescue Errno::ENOENT
+		puts "Invalid URL specified"
+		puts
+		exit
+	rescue => e
+		puts "Couldn't access the site"
+		puts
+		puts "Error: " + e.inspect
+		puts e.backtrace
+		exit
 	end
-rescue Errno::ENOENT
-	puts "Invalid URL specified"
-	puts
-	exit
-rescue => e
-	puts "Couldn't access the site"
-	puts
-	puts "Error: " + e.inspect
-	puts e.backtrace
-	exit
 end
 
-#puts "end of main loop"
+# puts "end of main loop"
 
 if wordlist
-	puts "Words found\n\n" if verbose
+	if verbose
+		if outfile.nil?
+			puts "Words found\n"
+		else
+			puts "Writing words to file\n"
+		end
+	end
 
 	sorted_wordlist = word_hash.sort_by do |word, count| -count end
 	sorted_wordlist.each do |word, count|
@@ -968,47 +994,49 @@ end
 #puts "end of wordlist loop"
 
 if email
-	puts "Dumping email addresses to file" if verbose
-
-	email_arr.delete_if { |x| x.chomp==""}
-	email_arr.uniq!
-	email_arr.sort!
-
-	if (wordlist||verbose) && email_outfile.nil?
-		outfile_file.puts
-	end
-	if email_outfile.nil?
-		outfile_file.puts "Email addresses found"
-		if email_arr.count == 0
-			outfile_file.puts "<No addresses found>\n"
-		else
-			outfile_file.puts email_arr.join("\n")
-		end
+	if email_arr.length == 0
+		puts "No email addresses found" if verbose
 	else
-		email_outfile_file.puts email_arr.join("\n")
+		puts "Dumping email addresses to file" if verbose
+
+		email_arr.delete_if { |x| x.chomp==""}
+		email_arr.uniq!
+		email_arr.sort!
+
+		if (wordlist||verbose) && email_outfile.nil?
+			outfile_file.puts
+		end
+		if email_outfile.nil?
+			outfile_file.puts "Email addresses found"
+			outfile_file.puts "---------------------"
+			outfile_file.puts email_arr.join("\n")
+		else
+			email_outfile_file.puts email_arr.join("\n")
+		end
 	end
 end
 
 #puts "end of email loop"
 
 if meta
-	puts "Dumping meta data to file" if verbose
-	usernames.delete_if { |x| x.chomp==""}
-	usernames.uniq!
-	usernames.sort!
-
-	if (email||wordlist) && meta_outfile.nil?
-		outfile_file.puts
-	end
-	if meta_outfile.nil?
-		outfile_file.puts "Meta data found"
-		if usernames.count == 0
-			outfile_file.puts "<No meta data found>\n"
-		else
-			outfile_file.puts usernames.join("\n")
-		end
+	if usernames.length == 0
+		puts "No meta data found" if verbose
 	else
-		meta_outfile_file.puts usernames.join("\n")
+		puts "Dumping meta data to file" if verbose
+		usernames.delete_if { |x| x.chomp==""}
+		usernames.uniq!
+		usernames.sort!
+
+		if (email||wordlist) && meta_outfile.nil?
+			outfile_file.puts
+		end
+		if meta_outfile.nil?
+			outfile_file.puts "Meta data found"
+			outfile_file.puts "---------------"
+			outfile_file.puts usernames.join("\n")
+		else
+			meta_outfile_file.puts usernames.join("\n")
+		end
 	end
 end
 
