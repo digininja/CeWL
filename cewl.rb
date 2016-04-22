@@ -969,7 +969,11 @@ if email
 	end
 	if email_outfile.nil?
 		outfile_file.puts "Email addresses found"
-		outfile_file.puts email_arr.join("\n")
+		if email_arr.count == 0
+			outfile_file.puts "<No addresses found>\n"
+		else
+			outfile_file.puts email_arr.join("\n")
+		end
 	else
 		email_outfile_file.puts email_arr.join("\n")
 	end
@@ -988,7 +992,11 @@ if meta
 	end
 	if meta_outfile.nil?
 		outfile_file.puts "Meta data found"
-		outfile_file.puts usernames.join("\n")
+		if usernames.count == 0
+			outfile_file.puts "<No meta data found>\n"
+		else
+			outfile_file.puts usernames.join("\n")
+		end
 	else
 		meta_outfile_file.puts usernames.join("\n")
 	end
