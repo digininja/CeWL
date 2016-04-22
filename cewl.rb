@@ -245,8 +245,13 @@ class MySpiderInstance<SpiderInstance
 			if res.redirect?
 				#puts "redirect url"
 				base_url = uri.to_s[0, uri.to_s.rindex('/')]
-				new_url = URI.parse(construct_complete_url(base_url,res['Location']))
-
+				u = construct_complete_url(base_url,res['Location'])
+				begin
+					new_url = URI.parse(u)
+				rescue URI::InvalidURIError
+					puts "Invalid URI #{u}" if @verbose
+					return
+				end
 				# If auth is used then a name:pass@ gets added, this messes the tree
 				# up so easiest to just remove it
 				current_uri = uri.to_s.gsub(/:\/\/[^:]*:[^@]*@/, "://")
@@ -274,7 +279,12 @@ class MySpiderInstance<SpiderInstance
 		if additional_url =~ /^#/
 			return nil
 		end
-		parsed_additional_url ||= URI.parse(additional_url)
+		begin
+			parsed_additional_url ||= URI.parse(additional_url)
+		rescue URI::InvalidURIError
+			puts "Invalid URI #{additional_url}" if @verbose
+			return nil
+		end
 		case parsed_additional_url.scheme
 			when nil
 				u = base_url.is_a?(URI) ? base_url : URI.parse(base_url)
