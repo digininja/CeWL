@@ -172,7 +172,7 @@ def process_file(filename, verbose=false)
 	meta_data=nil
 
 	begin
-	puts "provessling file: " + filename
+		puts "processing file: " + filename
 
 		if File.file?(filename) && File.exist?(filename)
 			mime_types=MIME::Types.type_for(filename)
