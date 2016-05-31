@@ -65,7 +65,7 @@
 
 VERSION = "5.1"
 
-puts"CeWL #{VERSION} Robin Wood (robin@digi.ninja) (http://digi.ninja)"
+puts"CeWL #{VERSION} Robin Wood (robin@digi.ninja) (https://digi.ninja/)"
 puts
 
 begin
