@@ -215,12 +215,13 @@ class MySpiderInstance<SpiderInstance
             http = proxy.start(uri.host, uri.port)
           end
         rescue => e
-          puts "Failed to connect to the proxy\n\n"
+          puts "\nFailed to connect to the proxy\n\n"
           exit 2
         end
       end
 
       req = Net::HTTP::Get.new(uri.request_uri, @headers)
+
 
       if @auth_type
         case @auth_type
@@ -267,7 +268,7 @@ class MySpiderInstance<SpiderInstance
         block.call(res)
       end
     rescue => e
-      puts "Unable to connect to the site, run in verbose mode for more information"
+      puts "\nUnable to connect to the site (#{uri.request_uri})"
 
       if @verbose
         puts "\nThe following error may help:"
@@ -275,8 +276,11 @@ class MySpiderInstance<SpiderInstance
         puts e.backtrace
         puts "Caller"
         puts caller
+      else
+        puts "Run in verbose mode (-v) for more information"
       end
 
+      puts "\n\n"
       exit 2
     end
   end
@@ -333,7 +337,7 @@ class MySpiderInstance<SpiderInstance
           end
         end
       rescue => e
-        puts "There was an error generating URL list"
+        puts "\nThere was an error generating URL list"
         puts "Error: #{e.inspect}"
         puts e.backtrace
         exit 2
@@ -552,12 +556,12 @@ begin
         show_count = true
       when "--meta-temp-dir"
         if !File.directory?(arg)
-          puts "Meta temp directory is not a directory\n\n"
+          puts "\nMeta temp directory is not a directory\n\n"
           exit 1
         end
 
         if !File.writable?(arg)
-          puts "The meta temp directory is not writable\n\n"
+          puts "\nThe meta temp directory is not writable\n\n"
           exit 1
         end
 
@@ -615,7 +619,7 @@ begin
             end
           end
         else
-          puts "Invalid authentication type, please specify either basic or digest\n\n"
+          puts "\nInvalid authentication type, please specify either basic or digest\n\n"
           exit 1
         end
     end
@@ -625,17 +629,17 @@ rescue
 end
 
 if auth_type && (auth_user.nil? || auth_pass.nil?)
-  puts "If using basic or digest auth you must provide a username and password\n\n"
+  puts "\nIf using basic or digest auth you must provide a username and password\n\n"
   exit 1
 end
 
 if auth_type.nil? && (!auth_user.nil? || !auth_pass.nil?)
-  puts "Authentication details provided but no mention of basic or digest\n\n"
+  puts "\nAuthentication details provided but no mention of basic or digest\n\n"
   exit 1
 end
 
 if ARGV.length != 1
-  puts "Missing url argument (try --help)\n\n"
+  puts "\nMissing url argument (try --help)\n\n"
   exit 1
 end
 
@@ -661,7 +665,7 @@ if outfile
   begin
     outfile_file = File.new(outfile, "w")
   rescue
-    puts "Couldn't open the output file for writing\n\n"
+    puts "\nCouldn't open the output file for writing\n\n"
     exit 2
   end
 else
@@ -672,7 +676,7 @@ if email_outfile && email
   begin
     email_outfile_file = File.new(email_outfile, "w")
   rescue
-    puts "Couldn't open the email output file for writing\n\n"
+    puts "\nCouldn't open the email output file for writing\n\n"
     exit 2
   end
 else
@@ -683,7 +687,7 @@ if meta_outfile && email
   begin
     meta_outfile_file = File.new(meta_outfile, "w")
   rescue
-    puts "Couldn't open the metadata output file for writing\n\n"
+    puts "\nCouldn't open the metadata output file for writing\n\n"
     exit 2
   end
 else
@@ -849,7 +853,7 @@ begin
           meta_data = process_file(output_filename, verbose)
           usernames += meta_data if (meta_data)
         rescue => e
-          puts "Couldn't open the meta temp file for writing - #{e.inspect}\n\n"
+          puts "\nCouldn't open the meta temp file for writing - #{e.inspect}\n\n"
           exit 2
         end
       end
@@ -882,7 +886,7 @@ begin
               end
             end
           rescue => e
-            puts "There was a problem generating the email list"
+            puts "\nThere was a problem generating the email list"
             puts "Error: #{e.inspect}"
             puts e.backtrace
           end
@@ -901,17 +905,17 @@ begin
           end
         end
       rescue => e
-        puts "There was a problem handling word generation"
+        puts "\nThere was a problem handling word generation"
         puts "Error: #{e.inspect}"
       end
     end
     s.store_next_urls_with url_stack
   end
 rescue Errno::ENOENT
-  puts "Invalid URL specified\n\n"
+  puts "\nInvalid URL specified\n\n"
   exit 2
 rescue => e
-  puts "Couldn't access the site\n"
+  puts "\nCouldn't access the site\n"
   puts "Error: #{e.inspect}"
   puts e.backtrace
   exit 2
