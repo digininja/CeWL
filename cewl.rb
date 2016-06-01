@@ -731,7 +731,8 @@ begin
             url_parsed = URI.parse(url)
             puts "Comparing #{a_url} with #{url}" if debug
 
-            allow = (a_url_parsed.host == url_parsed.host)
+            # Make sure the host, port and scheme matches (else its offsite)
+            allow = (a_url_parsed.host == url_parsed.host) && (a_url_parsed.port == url_parsed.port) && (a_url_parsed.scheme == url_parsed.scheme) ? true : false
 
             puts "Offsite link, not following: #{a_url}" if !allow && verbose
           end
