@@ -100,6 +100,7 @@ class MySpider<Spider
   @@auth_user = nil
   @@auth_password = nil
   @@verbose = false
+  @@debug = false
 
   def self.proxy (host, port=nil, username=nil, password=nil)
     @@proxy_host = host
@@ -119,6 +120,10 @@ class MySpider<Spider
     @@verbose = val
   end
 
+  def self.debug (val)
+    @@debug = val
+  end
+
   # Create an instance of MySpiderInstance rather than SpiderInstance
   def self.start_at(a_url, &block)
     rules = RobotRules.new('Ruby Spider 1.0')
@@ -133,6 +138,7 @@ class MySpider<Spider
     a_spider.proxy_password = @@proxy_password
 
     a_spider.verbose = @@verbose
+    a_spider.debug = @@debug
     block.call(a_spider)
     a_spider.start!
   end
@@ -151,6 +157,7 @@ class MySpiderInstance<SpiderInstance
   attr_writer :proxy_password
 
   attr_writer :verbose
+  attr_writer :debug
 
   # Force all files to be allowed
   # Normally the robots.txt file will be honoured
@@ -183,7 +190,7 @@ class MySpiderInstance<SpiderInstance
             #tmp_n_u[a_url] = generate_next_urls(a_url, response)
             #@next_urls.push tmp_n_u
             generate_next_urls(a_url, response).each do |a_next_url|
-              puts "Pushing #{a_next_url}" if debug
+              puts "Pushing #{a_next_url}" if @debug
               @next_urls.push a_url => a_next_url
             end
             #exit if interrupted
@@ -222,7 +229,6 @@ class MySpiderInstance<SpiderInstance
 
       req = Net::HTTP::Get.new(uri.request_uri, @headers)
 
-
       if @auth_type
         case @auth_type
           when "digest"
@@ -247,7 +253,7 @@ class MySpiderInstance<SpiderInstance
       res = http.request(req)
 
       if res.redirect?
-        puts "Redirect url" if debug
+        puts "Redirect url" if @debug
         base_url = uri.to_s[0, uri.to_s.rindex('/')]
         u = construct_complete_url(base_url, res['Location'])
 
@@ -912,10 +918,10 @@ begin
     s.store_next_urls_with url_stack
   end
 rescue Errno::ENOENT
-  puts "\nInvalid URL specified\n\n"
+  puts "\nInvalid URL specified (#{url})\n\n"
   exit 2
 rescue => e
-  puts "\nCouldn't access the site\n"
+  puts "\nCouldn't access the site (#{url})\n"
   puts "Error: #{e.inspect}"
   puts e.backtrace
   exit 2
