@@ -65,7 +65,7 @@
 
 VERSION = "5.1"
 
-puts"CeWL #{VERSION} Robin Wood (robin@digi.ninja) (https://digi.ninja/)"
+puts "CeWL #{VERSION} Robin Wood (robin@digi.ninja) (https://digi.ninja/)"
 puts
 
 begin
@@ -165,7 +165,7 @@ class MySpiderInstance<SpiderInstance
     trap("SIGINT") { interrupted = true }
     begin
       next_urls = @next_urls.pop
-      tmp_n_u = {}
+      #tmp_n_u = {}
       next_urls.each do |prior_url, urls|
         x = []
         urls.each_line do |a_url|
@@ -246,7 +246,7 @@ class MySpiderInstance<SpiderInstance
       if res.redirect?
         #puts "redirect url"
         base_url = uri.to_s[0, uri.to_s.rindex('/')]
-        u = construct_complete_url(base_url,res['Location'])
+        u = construct_complete_url(base_url, res['Location'])
         begin
           new_url = URI.parse(u)
         rescue URI::InvalidURIError
@@ -262,11 +262,11 @@ class MySpiderInstance<SpiderInstance
       else
         block.call(res)
       end
-    rescue  => e
+    rescue => e
       puts "Unable to connect to the site, run in verbose mode for more information"
       if @verbose
         puts
-        puts"The following error may help:"
+        puts "The following error may help:"
         puts e.to_s
         puts e.backtrace
         puts "Caller"
@@ -275,6 +275,7 @@ class MySpiderInstance<SpiderInstance
       exit
     end
   end
+
   # overriding so that I can get it to ingore direct names - i.e. #name
   def construct_complete_url(base_url, additional_url, parsed_additional_url = nil) #:nodoc:
     if additional_url =~ /^#/
@@ -313,7 +314,7 @@ class MySpiderInstance<SpiderInstance
     end
 
     doc = Nokogiri::HTML(web_page)
-    links = doc.css('a').map{ |a| a['href'] }
+    links = doc.css('a').map { |a| a['href'] }
     links.map do |link|
       begin
         if link.nil?
@@ -346,6 +347,7 @@ class TreeNode
   attr :depth
   attr :key
   attr :visited, true
+
   def initialize(key, value, depth)
     @key=key
     @value=value
@@ -360,8 +362,9 @@ class TreeNode
       return "key="+@key+" value="+@value+" depth="+@depth.to_s+" visited="+@visited.to_s
     end
   end
+
   def to_url_hash
-    return({@key=>@value})
+    return({@key => @value})
   end
 end
 
@@ -397,7 +400,7 @@ class Tree
 
   # The constructor
   def initialize(key=nil, value=nil, depth=0)
-    @data=TreeNode.new(key,value,depth)
+    @data=TreeNode.new(key, value, depth)
     @children = []
     @max_depth = 2
   end
@@ -405,7 +408,7 @@ class Tree
   # Itterator
   def each
     yield @data
-      @children.each do |child_node|
+    @children.each do |child_node|
       child_node.each { |e| yield e }
     end
   end
@@ -432,19 +435,19 @@ class Tree
     value=value.values_at(key).first
 
     if key==nil
-      @data=TreeNode.new(key,value,0)
+      @data=TreeNode.new(key, value, 0)
     else
       # if the depth is 0 then don't add anything to the tree
       if @max_depth == 0
         return
       end
       if key==@data.value
-        child=Tree.new(key,value, @data.depth+1)
+        child=Tree.new(key, value, @data.depth+1)
         @children << child
       else
         @children.each { |node|
           if node.data.value==key && node.data.depth<@max_depth
-            child=Tree.new(key,value, node.data.depth+1)
+            child=Tree.new(key, value, node.data.depth+1)
             @children << child
           end
         }
@@ -454,28 +457,28 @@ class Tree
 end
 
 opts = GetoptLong.new(
-  [ '--help', '-h', GetoptLong::NO_ARGUMENT ],
-  [ '--keep', '-k', GetoptLong::NO_ARGUMENT ],
-  [ '--depth', '-d', GetoptLong::OPTIONAL_ARGUMENT ],
-  [ '--min_word_length', "-m" , GetoptLong::REQUIRED_ARGUMENT ],
-  [ '--no-words', "-n" , GetoptLong::NO_ARGUMENT ],
-  [ '--offsite', "-o" , GetoptLong::NO_ARGUMENT ],
-  [ '--write', "-w" , GetoptLong::REQUIRED_ARGUMENT ],
-  [ '--ua', "-u" , GetoptLong::REQUIRED_ARGUMENT ],
-  [ '--meta-temp-dir', GetoptLong::REQUIRED_ARGUMENT ],
-  [ '--meta_file', GetoptLong::REQUIRED_ARGUMENT ],
-  [ '--email_file', GetoptLong::REQUIRED_ARGUMENT ],
-  [ '--meta', "-a" , GetoptLong::NO_ARGUMENT ],
-  [ '--email', "-e" , GetoptLong::NO_ARGUMENT ],
-  [ '--count', '-c', GetoptLong::NO_ARGUMENT ],
-  [ '--auth_user', GetoptLong::REQUIRED_ARGUMENT ],
-  [ '--auth_pass', GetoptLong::REQUIRED_ARGUMENT ],
-  [ '--auth_type', GetoptLong::REQUIRED_ARGUMENT ],
-  [ '--proxy_host', GetoptLong::REQUIRED_ARGUMENT ],
-  [ '--proxy_port', GetoptLong::REQUIRED_ARGUMENT ],
-  [ '--proxy_username', GetoptLong::REQUIRED_ARGUMENT ],
-  [ '--proxy_password', GetoptLong::REQUIRED_ARGUMENT ],
-  [ "--verbose", "-v" , GetoptLong::NO_ARGUMENT ]
+    ['--help', '-h', GetoptLong::NO_ARGUMENT],
+    ['--keep', '-k', GetoptLong::NO_ARGUMENT],
+    ['--depth', '-d', GetoptLong::OPTIONAL_ARGUMENT],
+    ['--min_word_length', "-m", GetoptLong::REQUIRED_ARGUMENT],
+    ['--no-words', "-n", GetoptLong::NO_ARGUMENT],
+    ['--offsite', "-o", GetoptLong::NO_ARGUMENT],
+    ['--write', "-w", GetoptLong::REQUIRED_ARGUMENT],
+    ['--ua', "-u", GetoptLong::REQUIRED_ARGUMENT],
+    ['--meta-temp-dir', GetoptLong::REQUIRED_ARGUMENT],
+    ['--meta_file', GetoptLong::REQUIRED_ARGUMENT],
+    ['--email_file', GetoptLong::REQUIRED_ARGUMENT],
+    ['--meta', "-a", GetoptLong::NO_ARGUMENT],
+    ['--email', "-e", GetoptLong::NO_ARGUMENT],
+    ['--count', '-c', GetoptLong::NO_ARGUMENT],
+    ['--auth_user', GetoptLong::REQUIRED_ARGUMENT],
+    ['--auth_pass', GetoptLong::REQUIRED_ARGUMENT],
+    ['--auth_type', GetoptLong::REQUIRED_ARGUMENT],
+    ['--proxy_host', GetoptLong::REQUIRED_ARGUMENT],
+    ['--proxy_port', GetoptLong::REQUIRED_ARGUMENT],
+    ['--proxy_username', GetoptLong::REQUIRED_ARGUMENT],
+    ['--proxy_password', GetoptLong::REQUIRED_ARGUMENT],
+    ["--verbose", "-v", GetoptLong::NO_ARGUMENT]
 )
 
 # Display the usage
@@ -545,82 +548,82 @@ strip_js = true
 begin
   opts.each do |opt, arg|
     case opt
-    when '--help'
-      usage
-    when "--count"
-      show_count = true
-    when "--meta-temp-dir"
-      if !File.directory?(arg)
-        puts "Meta temp directory is not a directory\n"
-        exit
-      end
-      if !File.writable?(arg)
-        puts "The meta temp directory is not writable\n"
-        exit
-      end
-      meta_temp_dir=arg
-      if meta_temp_dir !~ /.*\/$/
-        meta_temp_dir+="/"
-      end
-    when "--keep"
-      keep=true
-    when "--no-words"
-      wordlist=false
-    when "--meta_file"
-      meta_outfile = arg
-    when "--meta"
-      meta=true
-    when "--email_file"
-      email_outfile = arg
-    when "--email"
-      email=true
-    when '--min_word_length'
-      min_word_length=arg.to_i
-      if min_word_length<1
+      when '--help'
         usage
-      end
-    when '--depth'
-      depth=arg.to_i
-      if depth < 0
-        usage
-      end
-    when '--offsite'
-      offsite=true
-    when '--ua'
-      ua=arg
-    when '--verbose'
-      verbose=true
-    when '--write'
-      outfile=arg
-    when "--proxy_password"
-      proxy_password = arg
-    when "--proxy_username"
-      proxy_username = arg
-    when "--proxy_host"
-      proxy_host = arg
-    when "--proxy_port"
-      proxy_port = arg.to_i
-    when "--auth_pass"
-      auth_pass = arg
-    when "--auth_user"
-      auth_user = arg
-    when "--auth_type"
-      if arg =~ /(digest|basic)/i
-        auth_type=$1.downcase
-        if auth_type == "digest"
-          begin
-            require "net/http/digest_auth"
-          rescue LoadError => e
-            # catch error and prodive feedback on installing gem
-            puts "\nError: To use digest auth you require the net-http-digest_auth gem, to install it use:\n\n"
-            puts "\t\"gem install net-http-digest_auth\"\n\n"
-            exit
-          end
+      when "--count"
+        show_count = true
+      when "--meta-temp-dir"
+        if !File.directory?(arg)
+          puts "Meta temp directory is not a directory\n"
+          exit
         end
-      else
-        puts "Invalid authentication type, please specify either basic or digest"
-        exit
-      end
+        if !File.writable?(arg)
+          puts "The meta temp directory is not writable\n"
+          exit
+        end
+        meta_temp_dir=arg
+        if meta_temp_dir !~ /.*\/$/
+          meta_temp_dir+="/"
+        end
+      when "--keep"
+        keep=true
+      when "--no-words"
+        wordlist=false
+      when "--meta_file"
+        meta_outfile = arg
+      when "--meta"
+        meta=true
+      when "--email_file"
+        email_outfile = arg
+      when "--email"
+        email=true
+      when '--min_word_length'
+        min_word_length=arg.to_i
+        if min_word_length<1
+          usage
+        end
+      when '--depth'
+        depth=arg.to_i
+        if depth < 0
+          usage
+        end
+      when '--offsite'
+        offsite=true
+      when '--ua'
+        ua=arg
+      when '--verbose'
+        verbose=true
+      when '--write'
+        outfile=arg
+      when "--proxy_password"
+        proxy_password = arg
+      when "--proxy_username"
+        proxy_username = arg
+      when "--proxy_host"
+        proxy_host = arg
+      when "--proxy_port"
+        proxy_port = arg.to_i
+      when "--auth_pass"
+        auth_pass = arg
+      when "--auth_user"
+        auth_user = arg
+      when "--auth_type"
+        if arg =~ /(digest|basic)/i
+          auth_type=$1.downcase
+          if auth_type == "digest"
+            begin
+              require "net/http/digest_auth"
+            rescue LoadError => e
+              # catch error and prodive feedback on installing gem
+              puts "\nError: To use digest auth you require the net-http-digest_auth gem, to install it use:\n\n"
+              puts "\t\"gem install net-http-digest_auth\"\n\n"
+              exit
+            end
+          end
+        else
+          puts "Invalid authentication type, please specify either basic or digest"
+          exit
+        end
     end
   end
 rescue
@@ -664,7 +667,7 @@ usernames=Array.new()
 # Do the checks here so we don't do all the processing then find we can't open the file
 if !outfile.nil?
   begin
-    outfile_file=File.new(outfile,"w")
+    outfile_file=File.new(outfile, "w")
   rescue
     puts "Couldn't open the output file for writing"
     exit
@@ -675,7 +678,7 @@ end
 
 if !email_outfile.nil? and email
   begin
-    email_outfile_file=File.new(email_outfile,"w")
+    email_outfile_file=File.new(email_outfile, "w")
   rescue
     puts "Couldn't open the email output file for writing"
     exit
@@ -686,7 +689,7 @@ end
 
 if !meta_outfile.nil? and email
   begin
-    meta_outfile_file=File.new(meta_outfile,"w")
+    meta_outfile_file=File.new(meta_outfile, "w")
   rescue
     puts "Couldn't open the metadata output file for writing"
     exit
@@ -736,7 +739,7 @@ begin
           if !offsite
             a_url_parsed = URI.parse(a_url)
             url_parsed = URI.parse(url)
-              #puts 'comparing ' + a_url + ' with ' + url
+            #puts 'comparing ' + a_url + ' with ' + url
 
             allow = (a_url_parsed.host == url_parsed.host)
 
@@ -778,13 +781,13 @@ begin
         body += keywords.gsub(/[>"\/']*/, "")
       end
 
-#        puts body
-#        while /mailto:([^'">]*)/i.match(body)
-#          email_arr<<$1
-#          if verbose
-#            puts "Found #{$1} on page #{a_url}"
-#          end
-#        end
+      #        puts body
+      #        while /mailto:([^'">]*)/i.match(body)
+      #          email_arr<<$1
+      #          if verbose
+      #            puts "Found #{$1} on page #{a_url}"
+      #          end
+      #        end
 
       while /(location.href\s*=\s*["']([^"']*)['"];)/i.match(body)
         full_match = $1
@@ -795,7 +798,7 @@ begin
 
         re = Regexp.escape(full_match)
 
-        body.gsub!(/#{re}/,"")
+        body.gsub!(/#{re}/, "")
 
         if j_url !~ /https?:\/\//i
 
@@ -809,7 +812,7 @@ begin
           end
         end
 
-        x = {a_url=>j_url}
+        x = {a_url => j_url}
         url_stack.push x
       end
 
@@ -819,9 +822,9 @@ begin
 
       # If you want to add more attribute names to include, just add them to this array
       attribute_names = [
-                "alt",
-                "title",
-              ]
+          "alt",
+          "title",
+      ]
 
       attribute_text = ""
 
@@ -874,7 +877,7 @@ begin
           out.close
 
           meta_data=process_file(output_filename, verbose)
-          if(meta_data!=nil)
+          if (meta_data!=nil)
             usernames+=meta_data
           end
         rescue => e
@@ -919,7 +922,7 @@ begin
 
           if wordlist
             # remove any symbols
-            words.gsub!(/[^[:alpha:]]/i," ")
+            words.gsub!(/[^[:alpha:]]/i, " ")
             # add to the array
             words.split(" ").each do |word|
               if word.length >= min_word_length
@@ -956,7 +959,9 @@ end
 if wordlist
   puts "Words found\n\n" if verbose
 
-  sorted_wordlist = word_hash.sort_by do |word, count| -count end
+  sorted_wordlist = word_hash.sort_by do |word, count|
+    -count
+  end
   sorted_wordlist.each do |word, count|
     if show_count
       outfile_file.puts word + ', ' + count.to_s
@@ -971,7 +976,7 @@ end
 if email
   puts "Dumping email addresses to file" if verbose
 
-  email_arr.delete_if { |x| x.chomp==""}
+  email_arr.delete_if { |x| x.chomp=="" }
   email_arr.uniq!
   email_arr.sort!
 
@@ -994,7 +999,7 @@ end
 
 if meta
   puts "Dumping meta data to file" if verbose
-  usernames.delete_if { |x| x.chomp==""}
+  usernames.delete_if { |x| x.chomp=="" }
   usernames.uniq!
   usernames.sort!
 
