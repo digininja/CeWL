@@ -65,8 +65,7 @@
 
 VERSION = "5.1"
 
-puts "CeWL #{VERSION} Robin Wood (robin@digi.ninja) (https://digi.ninja/)"
-puts
+puts "CeWL #{VERSION} Robin Wood (robin@digi.ninja) (https://digi.ninja/)\n"
 
 begin
   require 'getoptlong'
@@ -74,17 +73,16 @@ begin
   require 'nokogiri'
   require 'net/http'
 rescue LoadError => e
-  # catch error and prodive feedback on installing gem
+  # Catch error and prodive feedback on installing gem
   if e.to_s =~ /cannot load such file -- (.*)/
     missing_gem = $1
     puts "\nError: #{missing_gem} gem not installed\n"
-    puts "\t use: \"gem install #{missing_gem}\" to install the required gem\n\n"
-    exit
+    puts "\t use: 'gem install #{missing_gem}' to install the required gem\n\n"
+    exit 2
   else
-    puts "There was an error loading the gems:"
-    puts
+    puts "There was an error loading the gems:\n"
     puts e.to_s
-    exit
+    exit 2
   end
 end
 
@@ -103,7 +101,7 @@ class MySpider<Spider
   @@auth_password = nil
   @@verbose = false
 
-  def self.proxy (host, port = nil, username = nil, password = nil)
+  def self.proxy (host, port=nil, username=nil, password=nil)
     @@proxy_host = host
     port = 8080 if port.nil?
     @@proxy_port = port
@@ -167,14 +165,17 @@ class MySpiderInstance<SpiderInstance
       next_urls = @next_urls.pop
       #tmp_n_u = {}
       next_urls.each do |prior_url, urls|
+
         x = []
         urls.each_line do |a_url|
           x << [a_url, (URI.parse(a_url) rescue nil)]
         end
+
         y = []
         x.select do |a_url, parsed_url|
           y << [a_url, parsed_url] if allowable_url?(a_url, parsed_url)
         end
+
         y.each do |a_url, parsed_url|
           @setup.call(a_url) unless @setup.nil?
           get_page(parsed_url) do |response|
@@ -182,11 +183,12 @@ class MySpiderInstance<SpiderInstance
             #tmp_n_u[a_url] = generate_next_urls(a_url, response)
             #@next_urls.push tmp_n_u
             generate_next_urls(a_url, response).each do |a_next_url|
-              #puts 'pushing ' + a_next_url
+              #puts "pushing #{a_next_url}"
               @next_urls.push a_url => a_next_url
             end
             #exit if interrupted
           end
+
           @teardown.call(a_url) unless @teardown.nil?
           exit if interrupted
         end
@@ -213,14 +215,14 @@ class MySpiderInstance<SpiderInstance
             http = proxy.start(uri.host, uri.port)
           end
         rescue => e
-          puts "Failed to connect to the proxy"
-          exit
+          puts "Failed to connect to the proxy\n\n"
+          exit 2
         end
       end
 
       req = Net::HTTP::Get.new(uri.request_uri, @headers)
 
-      if !@auth_type.nil?
+      if @auth_type
         case @auth_type
           when "digest"
             uri.user = @auth_user
@@ -247,12 +249,14 @@ class MySpiderInstance<SpiderInstance
         #puts "redirect url"
         base_url = uri.to_s[0, uri.to_s.rindex('/')]
         u = construct_complete_url(base_url, res['Location'])
+
         begin
           new_url = URI.parse(u)
         rescue URI::InvalidURIError
           puts "Invalid URI #{u}" if @verbose
           return
         end
+
         # If auth is used then a name:pass@ gets added, this messes the tree
         # up so easiest to just remove it
         current_uri = uri.to_s.gsub(/:\/\/[^:]*:[^@]*@/, "://")
@@ -264,29 +268,30 @@ class MySpiderInstance<SpiderInstance
       end
     rescue => e
       puts "Unable to connect to the site, run in verbose mode for more information"
+
       if @verbose
-        puts
-        puts "The following error may help:"
+        puts "\nThe following error may help:"
         puts e.to_s
         puts e.backtrace
         puts "Caller"
         puts caller
       end
-      exit
+
+      exit 2
     end
   end
 
-  # overriding so that I can get it to ingore direct names - i.e. #name
+  # Overriding so that I can get it to ingore direct names - i.e. #name
   def construct_complete_url(base_url, additional_url, parsed_additional_url = nil) #:nodoc:
-    if additional_url =~ /^#/
-      return nil
-    end
+    return nil if additional_url =~ /^#/
+
     begin
       parsed_additional_url ||= URI.parse(additional_url)
     rescue URI::InvalidURIError
       puts "Invalid URI #{additional_url}" if @verbose
       return nil
     end
+
     case parsed_additional_url.scheme
       when nil
         u = base_url.is_a?(URI) ? base_url : URI.parse(base_url)
@@ -307,7 +312,7 @@ class MySpiderInstance<SpiderInstance
   # Overriding the original spider one as it doesn't find hrefs very well
   def generate_next_urls(a_url, resp) #:nodoc:
     web_page = resp.body
-    if URI.parse(a_url).path == ""
+    if URI.parse(a_url).path.empty?
       base_url = a_url
     else
       base_url = a_url[0, a_url.rindex('/')]
@@ -322,20 +327,16 @@ class MySpiderInstance<SpiderInstance
         else
           begin
             parsed_link = URI.parse(link)
-            if parsed_link.fragment == '#'
-              nil
-            else
-              construct_complete_url(base_url, link, parsed_link)
-            end
+            parsed_link.fragment == '#' ? nil : construct_complete_url(base_url, link, parsed_link)
           rescue
             nil
           end
         end
       rescue => e
         puts "There was an error generating URL list"
-        puts "Error: " + e.inspect
+        puts "Error: #{e.inspect}"
         puts e.backtrace
-        exit
+        exit 2
       end
     end.compact
   end
@@ -349,17 +350,17 @@ class TreeNode
   attr :visited, true
 
   def initialize(key, value, depth)
-    @key=key
-    @value=value
-    @depth=depth
-    @visited=false
+    @key = key
+    @value = value
+    @depth = depth
+    @visited = false
   end
 
   def to_s
-    if key==nil
-      return "key=nil value="+@value+" depth="+@depth.to_s+" visited="+@visited.to_s
+    if key.nil?
+      return "key=nil value=#{@value} depth=#{@depth.to_s} visited=#{@visited.to_s}"
     else
-      return "key="+@key+" value="+@value+" depth="+@depth.to_s+" visited="+@visited.to_s
+      return "key=#{@key} value=#{@value} depth=#{@depth.to_s} visited=#{@visited.to_s}"
     end
   end
 
@@ -381,7 +382,7 @@ class Tree
 
   # Set the max depth the tree can grow to
   def max_depth=(val)
-    @max_depth=Integer(val)
+    @max_depth = Integer(val)
   end
 
   # As this is used to work out if there are any more nodes to process it isn't a true empty
@@ -390,9 +391,7 @@ class Tree
       return false
     else
       @children.each { |node|
-        if !node.data.visited
-          return false
-        end
+        return false if !node.data.visited
       }
     end
     return true
@@ -400,7 +399,7 @@ class Tree
 
   # The constructor
   def initialize(key=nil, value=nil, depth=0)
-    @data=TreeNode.new(key, value, depth)
+    @data = TreeNode.new(key, value, depth)
     @children = []
     @max_depth = 2
   end
@@ -416,12 +415,12 @@ class Tree
   # Remove an item from the tree
   def pop
     if !@data.visited
-      @data.visited=true
+      @data.visited = true
       return @data.to_url_hash
     else
       @children.each { |node|
         if !node.data.visited
-          node.data.visited=true
+          node.data.visited = true
           return node.data.to_url_hash
         end
       }
@@ -431,23 +430,23 @@ class Tree
 
   # Push an item onto the tree
   def push(value)
-    key=value.keys.first
-    value=value.values_at(key).first
+    key = value.keys.first
+    value = value.values_at(key).first
 
-    if key==nil
-      @data=TreeNode.new(key, value, 0)
+    if key.nil?
+      @data = TreeNode.new(key, value, 0)
     else
       # if the depth is 0 then don't add anything to the tree
       if @max_depth == 0
         return
       end
-      if key==@data.value
-        child=Tree.new(key, value, @data.depth+1)
+      if key == @data.value
+        child = Tree.new(key, value, @data.depth + 1)
         @children << child
       else
         @children.each { |node|
-          if node.data.value==key && node.data.depth<@max_depth
-            child=Tree.new(key, value, node.data.depth+1)
+          if node.data.value == key && node.data.depth<@max_depth
+            child = Tree.new(key, value, node.data.depth + 1)
             @children << child
           end
         }
@@ -515,23 +514,23 @@ def usage
   URL: The site to spider.
 
 "
-  exit
+  exit 0
 end
 
-verbose=false
-ua=nil
+verbose = false
+ua = nil
 url = nil
 outfile = nil
 email_outfile = nil
 meta_outfile = nil
 offsite = false
 depth = 2
-min_word_length=3
-email=false
-meta=false
-wordlist=true
-meta_temp_dir="/tmp/"
-keep=false
+min_word_length = 3
+email = false
+meta = false
+wordlist = true
+meta_temp_dir = "/tmp/"
+keep = false
 show_count = false
 auth_type = nil
 auth_user = nil
@@ -554,47 +553,43 @@ begin
         show_count = true
       when "--meta-temp-dir"
         if !File.directory?(arg)
-          puts "Meta temp directory is not a directory\n"
-          exit
+          puts "Meta temp directory is not a directory\n\n"
+          exit 1
         end
+
         if !File.writable?(arg)
-          puts "The meta temp directory is not writable\n"
-          exit
+          puts "The meta temp directory is not writable\n\n"
+          exit 1
         end
-        meta_temp_dir=arg
-        if meta_temp_dir !~ /.*\/$/
-          meta_temp_dir+="/"
-        end
+
+        meta_temp_dir = arg
+        meta_temp_dir += "/" if meta_temp_dir !~ /.*\/$/
       when "--keep"
-        keep=true
+        keep = true
       when "--no-words"
-        wordlist=false
+        wordlist = false
       when "--meta_file"
         meta_outfile = arg
       when "--meta"
-        meta=true
+        meta = true
       when "--email_file"
         email_outfile = arg
       when "--email"
-        email=true
+        email = true
       when '--min_word_length'
-        min_word_length=arg.to_i
-        if min_word_length<1
-          usage
-        end
+        min_word_length = arg.to_i
+        usage if min_word_length < 1
       when '--depth'
-        depth=arg.to_i
-        if depth < 0
-          usage
-        end
+        depth = arg.to_i
+        usage if depth < 0
       when '--offsite'
-        offsite=true
+        offsite = true
       when '--ua'
-        ua=arg
+        ua = arg
       when '--verbose'
-        verbose=true
+        verbose = true
       when '--write'
-        outfile=arg
+        outfile = arg
       when "--proxy_password"
         proxy_password = arg
       when "--proxy_username"
@@ -609,20 +604,20 @@ begin
         auth_user = arg
       when "--auth_type"
         if arg =~ /(digest|basic)/i
-          auth_type=$1.downcase
+          auth_type = $1.downcase
           if auth_type == "digest"
             begin
               require "net/http/digest_auth"
             rescue LoadError => e
-              # catch error and prodive feedback on installing gem
+              # Catch error and prodive feedback on installing gem
               puts "\nError: To use digest auth you require the net-http-digest_auth gem, to install it use:\n\n"
               puts "\t\"gem install net-http-digest_auth\"\n\n"
-              exit
+              exit 2
             end
           end
         else
-          puts "Invalid authentication type, please specify either basic or digest"
-          exit
+          puts "Invalid authentication type, please specify either basic or digest\n\n"
+          exit 1
         end
     end
   end
@@ -630,122 +625,107 @@ rescue
   usage
 end
 
-if !auth_type.nil? and (auth_user.nil? or auth_pass.nil?)
+if auth_type && (auth_user.nil? || auth_pass.nil?)
   puts "If using basic or digest auth you must provide a username and password\n\n"
-  exit
+  exit 1
 end
 
-if auth_type.nil? and (!auth_user.nil? or !auth_pass.nil?)
-  puts "Authentication details provided but no mention of basic or digest"
-  exit
+if auth_type.nil? && (!auth_user.nil? || !auth_pass.nil?)
+  puts "Authentication details provided but no mention of basic or digest\n\n"
+  exit 1
 end
 
 if ARGV.length != 1
-  puts "Missing url argument (try --help)"
-  exit 0
+  puts "Missing url argument (try --help)\n\n"
+  exit 1
 end
 
 url = ARGV.shift
 
 # Must have protocol
-if url !~ /^http(s)?:\/\//
-  url="http://"+url
-end
+url = "http://#{url}" if url !~ /^http(s)?:\/\//
 
 # The spider doesn't work properly if there isn't a / on the end
 if url !~ /\/$/
-#  Commented out for Yori
-#  url=url+"/"
+  # Commented out for Yori
+  #url = "#{url}/"
 end
 
 word_hash = {}
-email_arr=[]
-url_stack=Tree.new
-url_stack.max_depth=depth
-usernames=Array.new()
+email_arr = []
+url_stack = Tree.new
+url_stack.max_depth = depth
+usernames = Array.new()
 
 # Do the checks here so we don't do all the processing then find we can't open the file
-if !outfile.nil?
+if outfile
   begin
-    outfile_file=File.new(outfile, "w")
+    outfile_file = File.new(outfile, "w")
   rescue
-    puts "Couldn't open the output file for writing"
-    exit
+    puts "Couldn't open the output file for writing\n\n"
+    exit 2
   end
 else
-  outfile_file=$stdout
+  outfile_file = $stdout
 end
 
-if !email_outfile.nil? and email
+if email_outfile && email
   begin
-    email_outfile_file=File.new(email_outfile, "w")
+    email_outfile_file = File.new(email_outfile, "w")
   rescue
-    puts "Couldn't open the email output file for writing"
-    exit
+    puts "Couldn't open the email output file for writing\n\n"
+    exit 2
   end
 else
   email_outfile_file = outfile_file
 end
 
-if !meta_outfile.nil? and email
+if meta_outfile && email
   begin
-    meta_outfile_file=File.new(meta_outfile, "w")
+    meta_outfile_file = File.new(meta_outfile, "w")
   rescue
-    puts "Couldn't open the metadata output file for writing"
-    exit
+    puts "Couldn't open the metadata output file for writing\n\n"
+    exit 2
   end
 else
   meta_outfile_file = outfile_file
 end
 
 begin
-  if verbose
-    puts "Starting at " + url
-  end
+  puts "Starting at #{url}" if verbose
 
-  if !proxy_host.nil?
-    MySpider.proxy(proxy_host, proxy_port, proxy_username, proxy_password)
-  end
-
-  if !auth_type.nil?
-    MySpider.auth_creds(auth_type, auth_user, auth_pass)
-  end
+  MySpider.proxy(proxy_host, proxy_port, proxy_username, proxy_password) if proxy_host
+  MySpider.auth_creds(auth_type, auth_user, auth_pass) if auth_type
   MySpider.verbose(verbose)
 
   MySpider.start_at(url) do |s|
-    if ua!=nil
-      s.headers['User-Agent'] = ua
-    end
+    s.headers['User-Agent'] = ua if ua
 
     s.add_url_check do |a_url|
-      #puts "checking page " + a_url
-      allow=true
+      #puts "checking page #{a_url}"
+      allow = true
+
       # Extensions to ignore
       if a_url =~ /(\.zip$|\.gz$|\.zip$|\.bz2$|\.png$|\.gif$|\.jpg$|^#)/
-        if verbose
-          puts "Ignoring internal link or graphic: "+a_url
-        end
-        allow=false
+        puts "Ignoring internal link or graphic: #{a_url}" if verbose
+        allow = false
       else
         if /^mailto:(.*)/i.match(a_url)
           if email
             email_arr<<$1
-            if verbose
-              puts "Found #{$1} on page #{a_url}"
-            end
+            puts "Found #{$1} on page #{a_url}" if verbose
           end
-          allow=false
+          allow = false
         else
           if !offsite
             a_url_parsed = URI.parse(a_url)
             url_parsed = URI.parse(url)
-            #puts 'comparing ' + a_url + ' with ' + url
+            #puts "comparing #{a_url} with #{url}"
 
             allow = (a_url_parsed.host == url_parsed.host)
 
-            if !allow && verbose
-              puts "Offsite link, not following: "+a_url
-            end
+            puts "Offsite link, not following: #{a_url}" if !allow && verbose
+
           end
         end
       end
@@ -761,7 +741,8 @@ begin
           puts "Visiting: #{a_url} referred from #{prior_url}, got response code #{resp.code}"
         end
       end
-      html=resp.body.to_s.force_encoding("UTF-8")
+
+      html = resp.body.to_s.force_encoding("UTF-8")
       html.encode!('UTF-16', 'UTF-8', :invalid => :replace, :replace => '')
       html.encode!('UTF-8', 'UTF-16')
 
@@ -770,31 +751,28 @@ begin
       dom.css('style').remove if strip_css
       body = dom.to_s
 
-      # get meta data
+      # Get meta data
       if /.*<meta.*description.*content\s*=[\s'"]*(.*)/i.match(body)
-        description=$1
+        description = $1
         body += description.gsub(/[>"\/']*/, "")
       end
 
       if /.*<meta.*keywords.*content\s*=[\s'"]*(.*)/i.match(body)
-        keywords=$1
+        keywords = $1
         body += keywords.gsub(/[>"\/']*/, "")
       end
 
-      #        puts body
-      #        while /mailto:([^'">]*)/i.match(body)
-      #          email_arr<<$1
-      #          if verbose
-      #            puts "Found #{$1} on page #{a_url}"
-      #          end
-      #        end
+      #puts body
+      #while /mailto:([^'">]*)/i.match(body)
+      #  puts "Found #{$1} on page #{a_url}" if verbose
+      #  email_arr<<$1
+      #end
 
       while /(location.href\s*=\s*["']([^"']*)['"];)/i.match(body)
         full_match = $1
         j_url = $2
-        if verbose
-          puts "Javascript redirect found " + j_url
-        end
+
+        puts "Javascript redirect found #{j_url}" if verbose
 
         re = Regexp.escape(full_match)
 
@@ -802,21 +780,18 @@ begin
 
         if j_url !~ /https?:\/\//i
 
-# Broken, needs real domain adding here
-# http://docs.seattlerb.org/net-http-digest_auth/Net/HTTP/DigestAuth.html
-
+          # Broken, needs real domain adding here
+          # http://docs.seattlerb.org/net-http-digest_auth/Net/HTTP/DigestAuth.html
           domain = "http://ninja.dev/"
           j_url = domain + j_url
-          if verbose
-            puts "Relative URL found, adding domain to make " + j_url
-          end
+          puts "Relative URL found, adding domain to make #{j_url}" if verbose
         end
 
         x = {a_url => j_url}
         url_stack.push x
       end
 
-      # strip comment tags
+      # Strip comment tags
       body.gsub!(/<!--/, "")
       body.gsub!(/-->/, "")
 
@@ -838,58 +813,54 @@ begin
         puts
       end
 
-      body += " " + attribute_text
+      body += " #{attribute_text}"
 
-      # strip html tags
-      words=body.gsub(/<\/?[^>]*>/, "")
+      # Strip html tags
+      words = body.gsub(/<\/?[^>]*>/, "")
 
-      # check if this is needed
+      # Check if this is needed
       words.gsub!(/&[a-z]*;/, "")
 
-      # may want 0-9 in here as well in the future but for now limit it to a-z so
-      # you can't sneak any nasty characters in
+      # May want 0-9 in here as well in the future but for now limit it to a-z so
+      # You can't sneak any nasty characters in
       if /.*\.([a-z]+)(\?.*$|$)/i.match(a_url)
-        file_extension=$1
+        file_extension = $1
       else
-        file_extension=""
+        file_extension = ""
       end
 
       if meta
         begin
-          if keep and file_extension =~ /^((doc|dot|ppt|pot|xls|xlt|pps)[xm]?)|(ppam|xlsb|xlam|pdf|zip|gz|zip|bz2)$/
+          if keep && file_extension =~ /^((doc|dot|ppt|pot|xls|xlt|pps)[xm]?)|(ppam|xlsb|xlam|pdf|zip|gz|zip|bz2)$/
             if /.*\/(.*)$/.match(a_url)
-              output_filename=meta_temp_dir+$1
-              if verbose
-                puts "Keeping " + output_filename
-              end
+              output_filename = meta_temp_dir+$1
+              puts "Keeping #{output_filename}" if verbose
             else
-              # shouldn't ever get here as the regex above should always be able to pull the filename out of the url,
-              # but just in case
-              output_filename=meta_temp_dir+"cewl_tmp"
-              output_filename += "."+file_extension unless file_extension==""
+              # Shouldn't ever get here as the regex above should always be able to pull the filename out of the url,
+              # ...But just in case
+              output_filename = "#{meta_temp_dir}cewl_tmp"
+              output_filename += ".#{file_extension}" unless file_extension.empty?
             end
           else
-            output_filename=meta_temp_dir+"cewl_tmp"
-            output_filename += "."+file_extension unless file_extension==""
+            output_filename = "#{meta_temp_dir}cewl_tmp"
+            output_filename += ".#{file_extension}" unless file_extension.empty?
           end
-          out=File.new(output_filename, "w")
+          out = File.new(output_filename, "w")
           out.print(resp.body)
           out.close
 
-          meta_data=process_file(output_filename, verbose)
-          if (meta_data!=nil)
-            usernames+=meta_data
-          end
+          meta_data = process_file(output_filename, verbose)
+          usernames += meta_data if (meta_data)
         rescue => e
-          puts "Couldn't open the meta temp file for writing - " + e.inspect
-          exit
+          puts "Couldn't open the meta temp file for writing - #{e.inspect}\n\n"
+          exit 2
         end
       end
 
-      # don't get words from these file types. Most will have been blocked by the url_check function but
+      # Don't get words from these file types. Most will have been blocked by the url_check function but
       # some are let through, such as .css, so that they can be checked for email addresses
 
-      # this is a bad way to do this but it is either white or black list extensions and
+      # This is a bad way to do this but it is either white or black list extensions and
       # the list of either is quite long, may as well black list and let extra through
       # that can then be weeded out later than stop things that could be useful
       begin
@@ -906,24 +877,24 @@ begin
               # so give false positive type results
               words.each_line do |word|
                 while /\b([A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4})\b/i.match(word)
-                  if verbose
-                    puts "Found #{$1} on page #{a_url}"
-                  end
+                  puts "Found #{$1} on page #{a_url}" if verbose
+
                   email_arr<<$1
-                  word=word.gsub(/#{$1}/, "")
+                  word = word.gsub(/#{$1}/, "")
                 end
               end
             end
           rescue => e
             puts "There was a problem generating the email list"
-            puts "Error: " + e.inspect
+            puts "Error: #{e.inspect}"
             puts e.backtrace
           end
 
           if wordlist
-            # remove any symbols
+            # Remove any symbols
             words.gsub!(/[^[:alpha:]]/i, " ")
-            # add to the array
+
+            # Add to the array
             words.split(" ").each do |word|
               if word.length >= min_word_length
                 if !word_hash.has_key?(word)
@@ -936,22 +907,19 @@ begin
         end
       rescue => e
         puts "There was a problem handling word generation"
-        puts "Error: " + e.inspect
+        puts "Error: #{e.inspect}"
       end
     end
     s.store_next_urls_with url_stack
-
   end
 rescue Errno::ENOENT
-  puts "Invalid URL specified"
-  puts
-  exit
+  puts "Invalid URL specified\n\n"
+  exit 2
 rescue => e
-  puts "Couldn't access the site"
-  puts
-  puts "Error: " + e.inspect
+  puts "Couldn't access the site\n"
+  puts "Error: #{e.inspect}"
   puts e.backtrace
-  exit
+  exit 2
 end
 
 #puts "end of main loop"
@@ -962,9 +930,10 @@ if wordlist
   sorted_wordlist = word_hash.sort_by do |word, count|
     -count
   end
+
   sorted_wordlist.each do |word, count|
     if show_count
-      outfile_file.puts word + ', ' + count.to_s
+      outfile_file.puts "#{word}, #{count.to_s}"
     else
       outfile_file.puts word
     end
@@ -976,13 +945,12 @@ end
 if email
   puts "Dumping email addresses to file" if verbose
 
-  email_arr.delete_if { |x| x.chomp=="" }
+  email_arr.delete_if { |x| x.chomp.empty? }
   email_arr.uniq!
   email_arr.sort!
 
-  if (wordlist||verbose) && email_outfile.nil?
-    outfile_file.puts
-  end
+  outfile_file.puts if (wordlist || verbose) && email_outfile.nil?
+
   if email_outfile.nil?
     outfile_file.puts "Email addresses found"
     if email_arr.count == 0
@@ -999,15 +967,16 @@ end
 
 if meta
   puts "Dumping meta data to file" if verbose
-  usernames.delete_if { |x| x.chomp=="" }
+
+  usernames.delete_if { |x| x.chomp.empty? }
   usernames.uniq!
   usernames.sort!
 
-  if (email||wordlist) && meta_outfile.nil?
-    outfile_file.puts
-  end
+  outfile_file.puts if (email||wordlist) && meta_outfile.nil?
+
   if meta_outfile.nil?
     outfile_file.puts "Meta data found"
+
     if usernames.count == 0
       outfile_file.puts "<No meta data found>\n"
     else
@@ -1020,14 +989,6 @@ end
 
 #puts "end of meta loop"
 
-if meta_outfile!=nil
-  meta_outfile_file.close
-end
-
-if email_outfile!=nil
-  email_outfile_file.close
-end
-
-if outfile!=nil
-  outfile_file.close
-end
+meta_outfile_file.close if meta_outfile
+email_outfile_file.close if email_outfile
+outfile_file.close if outfile
