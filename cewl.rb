@@ -183,7 +183,7 @@ class MySpiderInstance<SpiderInstance
             #tmp_n_u[a_url] = generate_next_urls(a_url, response)
             #@next_urls.push tmp_n_u
             generate_next_urls(a_url, response).each do |a_next_url|
-              #puts "pushing #{a_next_url}"
+              puts "pushing #{a_next_url}" if debug
               @next_urls.push a_url => a_next_url
             end
             #exit if interrupted
@@ -246,7 +246,7 @@ class MySpiderInstance<SpiderInstance
       res = http.request(req)
 
       if res.redirect?
-        #puts "redirect url"
+        puts "redirect url" if debug
         base_url = uri.to_s[0, uri.to_s.rindex('/')]
         u = construct_complete_url(base_url, res['Location'])
 
@@ -437,9 +437,7 @@ class Tree
       @data = TreeNode.new(key, value, 0)
     else
       # if the depth is 0 then don't add anything to the tree
-      if @max_depth == 0
-        return
-      end
+      return if @max_depth == 0
       if key == @data.value
         child = Tree.new(key, value, @data.depth + 1)
         @children << child
@@ -517,6 +515,7 @@ def usage
   exit 0
 end
 
+debug = false
 verbose = false
 ua = nil
 url = nil
@@ -702,7 +701,7 @@ begin
     s.headers['User-Agent'] = ua if ua
 
     s.add_url_check do |a_url|
-      #puts "checking page #{a_url}"
+      puts "checking page #{a_url}" if debug
       allow = true
 
       # Extensions to ignore
@@ -720,7 +719,7 @@ begin
           if !offsite
             a_url_parsed = URI.parse(a_url)
             url_parsed = URI.parse(url)
-            #puts "comparing #{a_url} with #{url}"
+            puts "comparing #{a_url} with #{url}" if debug
 
             allow = (a_url_parsed.host == url_parsed.host)
 
@@ -762,11 +761,13 @@ begin
         body += keywords.gsub(/[>"\/']*/, "")
       end
 
-      #puts body
-      #while /mailto:([^'">]*)/i.match(body)
-      #  puts "Found #{$1} on page #{a_url}" if verbose
-      #  email_arr<<$1
-      #end
+      if debug
+        puts body
+        while /mailto:([^'">]*)/i.match(body)
+          puts "Found #{$1} on page #{a_url}" if verbose
+          email_arr<<$1
+        end
+      end
 
       while /(location.href\s*=\s*["']([^"']*)['"];)/i.match(body)
         full_match = $1
@@ -922,7 +923,7 @@ rescue => e
   exit 2
 end
 
-#puts "end of main loop"
+puts "end of main loop" if debug
 
 if wordlist
   puts "Words found\n\n" if verbose
@@ -940,7 +941,7 @@ if wordlist
   end
 end
 
-#puts "end of wordlist loop"
+puts "end of wordlist loop" if debug
 
 if email
   puts "Dumping email addresses to file" if verbose
@@ -963,7 +964,7 @@ if email
   end
 end
 
-#puts "end of email loop"
+puts "end of email loop" if debug
 
 if meta
   puts "Dumping meta data to file" if verbose
@@ -987,7 +988,7 @@ if meta
   end
 end
 
-#puts "end of meta loop"
+puts "end of meta loop" if debug
 
 meta_outfile_file.close if meta_outfile
 email_outfile_file.close if email_outfile
