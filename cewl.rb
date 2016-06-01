@@ -77,7 +77,7 @@ rescue LoadError => e
   if e.to_s =~ /cannot load such file -- (.*)/
     missing_gem = $1
     puts "\nError: #{missing_gem} gem not installed\n"
-    puts "\t use: 'gem install #{missing_gem}' to install the required gem\n\n"
+    puts "\t Use: 'gem install #{missing_gem}' to install the required gem\n\n"
     exit 2
   else
     puts "There was an error loading the gems:\n"
@@ -183,7 +183,7 @@ class MySpiderInstance<SpiderInstance
             #tmp_n_u[a_url] = generate_next_urls(a_url, response)
             #@next_urls.push tmp_n_u
             generate_next_urls(a_url, response).each do |a_next_url|
-              puts "pushing #{a_next_url}" if debug
+              puts "Pushing #{a_next_url}" if debug
               @next_urls.push a_url => a_next_url
             end
             #exit if interrupted
@@ -246,7 +246,7 @@ class MySpiderInstance<SpiderInstance
       res = http.request(req)
 
       if res.redirect?
-        puts "redirect url" if debug
+        puts "Redirect url" if debug
         base_url = uri.to_s[0, uri.to_s.rindex('/')]
         u = construct_complete_url(base_url, res['Location'])
 
@@ -436,7 +436,7 @@ class Tree
     if key.nil?
       @data = TreeNode.new(key, value, 0)
     else
-      # if the depth is 0 then don't add anything to the tree
+      # If the depth is 0 then don't add anything to the tree
       return if @max_depth == 0
       if key == @data.value
         child = Tree.new(key, value, @data.depth + 1)
@@ -609,8 +609,8 @@ begin
               require "net/http/digest_auth"
             rescue LoadError => e
               # Catch error and prodive feedback on installing gem
-              puts "\nError: To use digest auth you require the net-http-digest_auth gem, to install it use:\n\n"
-              puts "\t\"gem install net-http-digest_auth\"\n\n"
+              puts "\nError: To use digest auth you require the net-http-digest_auth gem\n"
+              puts "\t Use: 'gem install net-http-digest_auth'\n\n"
               exit 2
             end
           end
@@ -701,7 +701,7 @@ begin
     s.headers['User-Agent'] = ua if ua
 
     s.add_url_check do |a_url|
-      puts "checking page #{a_url}" if debug
+      puts "Checking page #{a_url}" if debug
       allow = true
 
       # Extensions to ignore
@@ -711,7 +711,7 @@ begin
       else
         if /^mailto:(.*)/i.match(a_url)
           if email
-            email_arr<<$1
+            email_arr << $1
             puts "Found #{$1} on page #{a_url}" if verbose
           end
           allow = false
@@ -719,12 +719,11 @@ begin
           if !offsite
             a_url_parsed = URI.parse(a_url)
             url_parsed = URI.parse(url)
-            puts "comparing #{a_url} with #{url}" if debug
+            puts "Comparing #{a_url} with #{url}" if debug
 
             allow = (a_url_parsed.host == url_parsed.host)
 
             puts "Offsite link, not following: #{a_url}" if !allow && verbose
-
           end
         end
       end
@@ -732,7 +731,6 @@ begin
     end
 
     s.on :success do |a_url, resp, prior_url|
-
       if verbose
         if prior_url.nil?
           puts "Visiting: #{a_url}, got response code #{resp.code}"
@@ -765,7 +763,7 @@ begin
         puts body
         while /mailto:([^'">]*)/i.match(body)
           puts "Found #{$1} on page #{a_url}" if verbose
-          email_arr<<$1
+          email_arr <<  $1
         end
       end
 
@@ -776,11 +774,9 @@ begin
         puts "Javascript redirect found #{j_url}" if verbose
 
         re = Regexp.escape(full_match)
-
         body.gsub!(/#{re}/, "")
 
         if j_url !~ /https?:\/\//i
-
           # Broken, needs real domain adding here
           # http://docs.seattlerb.org/net-http-digest_auth/Net/HTTP/DigestAuth.html
           domain = "http://ninja.dev/"
@@ -805,7 +801,7 @@ begin
       attribute_text = ""
 
       attribute_names.each { |attribute_name|
-        body.gsub!(/#{attribute_name}="([^"]*)"/) { |attr| attribute_text += $1 + " " }
+        body.gsub!(/#{attribute_name}="([^"]*)"/) { |attr| attribute_text += "#{$1} " }
       }
 
       if verbose
@@ -898,9 +894,7 @@ begin
             # Add to the array
             words.split(" ").each do |word|
               if word.length >= min_word_length
-                if !word_hash.has_key?(word)
-                  word_hash[word] = 0
-                end
+                word_hash[word] = 0 if !word_hash.has_key?(word)
                 word_hash[word] += 1
               end
             end
@@ -923,7 +917,7 @@ rescue => e
   exit 2
 end
 
-puts "end of main loop" if debug
+puts "End of main loop" if debug
 
 if wordlist
   puts "Words found\n\n" if verbose
@@ -941,7 +935,7 @@ if wordlist
   end
 end
 
-puts "end of wordlist loop" if debug
+puts "End of wordlist loop" if debug
 
 if email
   puts "Dumping email addresses to file" if verbose
@@ -964,7 +958,7 @@ if email
   end
 end
 
-puts "end of email loop" if debug
+puts "End of email loop" if debug
 
 if meta
   puts "Dumping meta data to file" if verbose
@@ -988,7 +982,7 @@ if meta
   end
 end
 
-puts "end of meta loop" if debug
+puts "End of meta loop" if debug
 
 meta_outfile_file.close if meta_outfile
 email_outfile_file.close if email_outfile
