@@ -73,7 +73,7 @@ begin
   require 'nokogiri'
   require 'net/http'
 rescue LoadError => e
-  # Catch error and prodive feedback on installing gem
+  # Catch error and provide feedback on installing gem
   if e.to_s =~ /cannot load such file -- (.*)/
     missing_gem = $1
     puts "\nError: #{missing_gem} gem not installed\n"
@@ -92,7 +92,7 @@ trap("SIGINT") { throw :ctrl_c }
 
 require './cewl_lib'
 
-# Doing this so I can override the allowed? fuction which normally checks
+# Doing this so I can override the allowed? function which normally checks
 # the robots.txt file
 class MySpider<Spider
   @@proxy_host = nil
@@ -174,7 +174,7 @@ class MySpiderInstance<SpiderInstance
     trap("SIGINT") { interrupted = true }
     begin
       next_urls = @next_urls.pop
-      tmp_n_u = {}
+      #tmp_n_u = {}
       next_urls.each do |prior_url, urls|
         x = []
 
@@ -227,7 +227,7 @@ class MySpiderInstance<SpiderInstance
             http = proxy.start(uri.host, uri.port)
           end
         rescue => e
-          puts "Failed to connect to the proxy\n\n"
+          puts "\nFailed to connect to the proxy (#{@proxy_host}:#{@proxy_port})\n\n"
           exit 2
         end
       end
@@ -258,7 +258,7 @@ class MySpiderInstance<SpiderInstance
       res = http.request(req)
 
       if res.redirect?
-        puts "Redirect url" if @debug
+        puts "Redirect URL" if @debug
         base_url = uri.to_s[0, uri.to_s.rindex('/')]
         new_url = URI.parse(construct_complete_url(base_url, res['Location']))
 
@@ -279,20 +279,24 @@ class MySpiderInstance<SpiderInstance
         puts "Message is #{e.to_s}"
       end
     rescue => e
-      puts "Unable to connect to the site, run in verbose mode for more information"
+      puts "\nUnable to connect to the site (#{uri.host}:#{uri.port}#{uri.request_uri})"
+
       if @verbose
         puts "\nThe following error may help:"
         puts e.to_s
         puts e.backtrace
         puts "\nCaller"
         puts caller
+      else
+        puts "Run in verbose mode (-v) for more information"
       end
 
+      puts "\n\n"
       exit 2
     end
   end
 
-  # Overriding so that I can get it to ingore direct names - i.e. #name
+  # Overriding so that I can get it to ignore direct names - i.e. #name
   def construct_complete_url(base_url, additional_url, parsed_additional_url = nil) #:nodoc:
     return nil if additional_url =~ /^#/
 
@@ -338,7 +342,7 @@ class MySpiderInstance<SpiderInstance
           end
         end
       rescue => e
-        puts "There was an error generating URL list"
+        puts "\nThere was an error generating URL list"
         puts "Error: #{e.inspect}"
         puts e.backtrace
         exit 2
@@ -492,7 +496,7 @@ def usage
     --min_word_length, -m: minimum word length, default 3
     --offsite, -o: let the spider visit other sites
     --write, -w file: write the output to the file
-    --ua, -u user-agent: useragent to send
+    --ua, -u user-agent: user agent to send
     --no-words, -n: don't output the wordlist
     --meta, -a include meta data
     --meta_file file: output file for meta data
@@ -529,7 +533,7 @@ email_outfile = nil
 meta_outfile = nil
 offsite = false
 depth = 2
-min_word_length=3
+min_word_length = 3
 email = false
 meta = false
 wordlist = true
@@ -557,12 +561,12 @@ begin
         show_count = true
       when "--meta-temp-dir"
         if !File.directory?(arg)
-          puts "Meta temp directory is not a directory\n\n"
+          puts "\nMeta temp directory is not a directory\n\n"
           exit 1
         end
 
         if !File.writable?(arg)
-          puts "The meta temp directory is not writable\n\n"
+          puts "\nThe meta temp directory is not writable\n\n"
           exit 1
         end
 
@@ -589,11 +593,11 @@ begin
       when '--offsite'
         offsite = true
       when '--ua'
-        ua=arg
+        ua = arg
       when '--verbose'
         verbose = true
       when '--write'
-        outfile=arg
+        outfile = arg
       when "--proxy_password"
         proxy_password = arg
       when "--proxy_username"
@@ -613,14 +617,14 @@ begin
             begin
               require "net/http/digest_auth"
             rescue LoadError => e
-              # Catch error and prodive feedback on installing gem
+              # Catch error and provide feedback on installing gem
               puts "\nError: To use digest auth you require the net-http-digest_auth gem\n"
               puts "\t Use: 'gem install net-http-digest_auth'\n\n"
               exit 2
             end
           end
         else
-          puts "Invalid authentication type, please specify either basic or digest\n\n"
+          puts "\nInvalid authentication type, please specify either basic or digest\n\n"
           exit 1
         end
     end
@@ -630,17 +634,17 @@ rescue
 end
 
 if auth_type && (auth_user.nil? || auth_pass.nil?)
-  puts "If using basic or digest auth you must provide a username and password\n\n"
+  puts "\nIf using basic or digest auth you must provide a username and password\n\n"
   exit 1
 end
 
 if auth_type.nil? && (!auth_user.nil? || !auth_pass.nil?)
-  puts "Authentication details provided but no mention of basic or digest\n\n"
+  puts "\nAuthentication details provided but no mention of basic or digest\n\n"
   exit 1
 end
 
 if ARGV.length != 1
-  puts "Missing url argument (try --help)\n\n"
+  puts "\nMissing URL argument (try --help)\n\n"
   exit 1
 end
 
@@ -666,7 +670,7 @@ if outfile
   begin
     outfile_file = File.new(outfile, "w")
   rescue
-    puts "Couldn't open the output file for writing\n\n"
+    puts "\nCouldn't open the output file for writing\n\n"
     exit 2
   end
 else
@@ -677,7 +681,7 @@ if email_outfile && email
   begin
     email_outfile_file = File.new(email_outfile, "w")
   rescue
-    puts "Couldn't open the email output file for writing\n\n"
+    puts "\nCouldn't open the email output file for writing\n\n"
     exit 2
   end
 else
@@ -688,7 +692,7 @@ if meta_outfile && email
   begin
     meta_outfile_file = File.new(meta_outfile, "w")
   rescue
-    puts "Couldn't open the metadata output file for writing\n\n"
+    puts "\nCouldn't open the metadata output file for writing\n\n"
     exit 2
   end
 else
@@ -709,6 +713,7 @@ catch :ctrl_c do
       s.add_url_check do |a_url|
         puts "Checking page #{a_url}" if debug
         allow = true
+
         # Extensions to ignore
         if a_url =~ /(\.zip$|\.gz$|\.zip$|\.bz2$|\.png$|\.gif$|\.jpg$|^#)/
           puts "Ignoring internal link or graphic: #{a_url}" if verbose
@@ -763,13 +768,13 @@ catch :ctrl_c do
         if file_extension =~ /^((doc|dot|ppt|pot|xls|xlt|pps)[xm]?)|(ppam|xlsb|xlam|pdf|zip|gz|zip|bz2|png|gif|jpg|#)$/
           if meta
             begin
-              if keep and file_extension =~ /^((doc|dot|ppt|pot|xls|xlt|pps)[xm]?)|(ppam|xlsb|xlam|pdf|zip|gz|zip|bz2)$/
+              if keep && file_extension =~ /^((doc|dot|ppt|pot|xls|xlt|pps)[xm]?)|(ppam|xlsb|xlam|pdf|zip|gz|zip|bz2)$/
                 if /.*\/(.*)$/.match(a_url)
                   output_filename = meta_temp_dir + $1
                   puts "Keeping #{output_filename}" if verbose
                 else
                   # Shouldn't ever get here as the regex above should always be able to pull the filename out of the url,
-                  # but just in case
+                  # ...but just in case
 
                   # Maybe look at doing this to make the tmp name
                   # require "tempfile"
@@ -777,11 +782,11 @@ catch :ctrl_c do
                   #  => "a20150707-8694-hrrxr4-b"
 
                   output_filename = "#{meta_temp_dir}cewl_tmp"
-                  output_filename += ".#{file_extension}" unless file_extension == ''
+                  output_filename += ".#{file_extension}" unless file_extension.empty?
                 end
               else
                 output_filename = "#{meta_temp_dir}cewl_tmp"
-                output_filename += ".#{file_extension}" unless file_extension == ''
+                output_filename += ".#{file_extension}" unless file_extension.empty?
               end
 
               out = File.new(output_filename, "wb")
@@ -791,7 +796,7 @@ catch :ctrl_c do
               meta_data = process_file(output_filename, verbose)
               usernames += meta_data if (meta_data != nil)
             rescue => e
-              puts "Couldn't open the meta temp file for writing - #{e.inspect}\n\n"
+              puts "\nCouldn't open the meta temp file for writing - #{e.inspect}\n\n"
               exit 2
             end
           end
@@ -805,7 +810,7 @@ catch :ctrl_c do
           dom.css('style').remove if strip_css
           body = dom.to_s
 
-          # get meta data
+          # Get meta data
           if /.*<meta.*description.*content\s*=[\s'"]*(.*)/i.match(body)
             description = $1
             body += description.gsub(/[>"\/']*/, "")
@@ -826,6 +831,7 @@ catch :ctrl_c do
           while /(location.href\s*=\s*["']([^"']*)['"];)/i.match(body)
             full_match = $1
             j_url = $2
+
             puts "Javascript redirect found #{j_url}" if verbose
 
             re = Regexp.escape(full_match)
@@ -836,7 +842,7 @@ catch :ctrl_c do
               protocol = parsed.scheme
               host = parsed.host
 
-              domain = protocol + "://" + host
+              domain = "#{protocol}://#{host}"
 
               j_url = domain + j_url
               j_url += $1 if j_url[0] == "/" && parsed.path =~ /(.*)\/.*/
@@ -899,7 +905,7 @@ catch :ctrl_c do
                 end
               end
             rescue => e
-              puts "There was a problem generating the email list"
+              puts "\nThere was a problem generating the email list"
               puts "Error: #{e.inspect}"
               puts e.backtrace
             end
@@ -918,7 +924,7 @@ catch :ctrl_c do
             end
             #end
           rescue => e
-            puts "There was a problem handling word generation"
+            puts "\nThere was a problem handling word generation"
             puts "Error: #{e.inspect}"
             puts e.backtrace
           end
@@ -927,10 +933,10 @@ catch :ctrl_c do
       s.store_next_urls_with url_stack
     end
   rescue Errno::ENOENT
-    puts "Invalid URL specified\n\n"
+    puts "\nInvalid URL specified (#{url})\n\n"
     exit 2
   rescue => e
-    puts "Couldn't access the site\n"
+    puts "\nCouldn't access the site (#{url})\n"
     puts "Error: #{e.inspect}"
     exit 2
   end
@@ -1006,7 +1012,7 @@ if meta
   end
 end
 
-puts "end of meta loop" if debug
+puts "End of meta loop" if debug
 
 meta_outfile_file.close if meta_outfile
 email_outfile_file.close if email_outfile
