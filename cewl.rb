@@ -77,7 +77,7 @@ rescue LoadError => e
   if e.to_s =~ /cannot load such file -- (.*)/
     missing_gem = $1
     puts "\nError: #{missing_gem} gem not installed\n"
-    puts "\t use: 'gem install #{missing_gem}' to install the required gem\n\n"
+    puts "\t Use: 'gem install #{missing_gem}' to install the required gem\n\n"
     exit 2
   else
     puts "There was an error loading the gems:\n"
@@ -441,7 +441,7 @@ class Tree
     if key.nil?
       @data = TreeNode.new(key, value, 0)
     else
-      # if the depth is 0 then don't add anything to the tree
+      # If the depth is 0 then don't add anything to the tree
       return if @max_depth == 0
       if key == @data.value
         child = Tree.new(key, value, @data.depth + 1)
@@ -614,8 +614,8 @@ begin
               require "net/http/digest_auth"
             rescue LoadError => e
               # Catch error and prodive feedback on installing gem
-              puts "\nError: To use digest auth you require the net-http-digest_auth gem, to install it use:\n\n"
-              puts "\t\"gem install net-http-digest_auth\"\n\n"
+              puts "\nError: To use digest auth you require the net-http-digest_auth gem\n"
+              puts "\t Use: 'gem install net-http-digest_auth'\n\n"
               exit 2
             end
           end
@@ -707,7 +707,7 @@ catch :ctrl_c do
       s.headers['User-Agent'] = ua if ua
 
       s.add_url_check do |a_url|
-        puts "checking page #{a_url}" if debug
+        puts "Checking page #{a_url}" if debug
         allow = true
         # Extensions to ignore
         if a_url =~ /(\.zip$|\.gz$|\.zip$|\.bz2$|\.png$|\.gif$|\.jpg$|^#)/
@@ -716,7 +716,7 @@ catch :ctrl_c do
         else
           if /^mailto:(.*)/i.match(a_url)
             if email
-              email_arr<<$1
+              email_arr << $1
               puts "Found #{$1} on page #{a_url}" if verbose
             end
             allow = false
@@ -724,7 +724,7 @@ catch :ctrl_c do
             if !offsite
               a_url_parsed = URI.parse(a_url)
               url_parsed = URI.parse(url)
-              puts "comparing #{a_url} with #{url}" if debug
+              puts "Comparing #{a_url} with #{url}" if debug
 
               allow = (a_url_parsed.host == url_parsed.host)
 
@@ -736,7 +736,6 @@ catch :ctrl_c do
       end
 
       s.on :success do |a_url, resp, prior_url|
-
         if verbose
           if prior_url.nil?
             puts "Visiting: #{a_url}, got response code #{resp.code}"
@@ -830,7 +829,6 @@ catch :ctrl_c do
             puts "Javascript redirect found #{j_url}" if verbose
 
             re = Regexp.escape(full_match)
-
             body.gsub!(/#{re}/, "")
 
             if j_url !~ /https?:\/\//i
@@ -863,7 +861,7 @@ catch :ctrl_c do
           attribute_text = ''
 
           attribute_names.each { |attribute_name|
-            body.gsub!(/#{attribute_name}="([^"]*)"/) { |attr| attribute_text += $1 + " " }
+            body.gsub!(/#{attribute_name}="([^"]*)"/) { |attr| attribute_text += "#{$1} " }
           }
 
           if verbose and attribute_text
@@ -895,7 +893,7 @@ catch :ctrl_c do
                 words.each_line do |word|
                   while /\b([A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4})\b/i.match(word)
                     puts "Found #{$1} on page #{a_url}" if verbose
-                    email_arr<<$1
+                    email_arr << $1
                     word = word.gsub(/#{$1}/, "")
                   end
                 end
@@ -938,7 +936,7 @@ catch :ctrl_c do
   end
 end
 
-puts "end of main loop" if debug
+puts "End of main loop" if debug
 
 if wordlist
   if verbose
@@ -962,7 +960,7 @@ if wordlist
   end
 end
 
-puts "end of wordlist loop" if debug
+puts "End of wordlist loop" if debug
 
 if email
   if email_arr.length == 0
@@ -986,7 +984,7 @@ if email
   end
 end
 
-puts "end of email loop" if debug
+puts "End of email loop" if debug
 
 if meta
   if usernames.length == 0
