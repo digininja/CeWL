@@ -104,6 +104,7 @@ class MySpider<Spider
   @@auth_user = nil
   @@auth_password = nil
   @@verbose = false
+  @@debug = false
 
   def self.proxy (host, port = nil, username = nil, password = nil)
     @@proxy_host = host
@@ -123,6 +124,10 @@ class MySpider<Spider
     @@verbose = val
   end
 
+  def self.debug (val)
+    @@debug = val
+  end
+
   # Create an instance of MySpiderInstance rather than SpiderInstance
   def self.start_at(a_url, &block)
     rules = RobotRules.new('Ruby Spider 1.0')
@@ -137,6 +142,7 @@ class MySpider<Spider
     a_spider.proxy_password = @@proxy_password
 
     a_spider.verbose = @@verbose
+    a_spider.debug = @@debug
     block.call(a_spider)
     a_spider.start!
   end
@@ -155,6 +161,7 @@ class MySpiderInstance<SpiderInstance
   attr_writer :proxy_password
 
   attr_writer :verbose
+  attr_writer :debug
 
   # Force all files to be allowed
   # Normally the robots.txt file will be honoured
@@ -187,7 +194,7 @@ class MySpiderInstance<SpiderInstance
             #tmp_n_u[a_url] = generate_next_urls(a_url, response)
             #@next_urls.push tmp_n_u
             generate_next_urls(a_url, response).each do |a_next_url|
-              #puts "pushing #{a_next_url}"
+              puts "Pushing #{a_next_url}" if @debug
               @next_urls.push a_url => a_next_url
             end
             #exit if interrupted
@@ -251,7 +258,7 @@ class MySpiderInstance<SpiderInstance
       res = http.request(req)
 
       if res.redirect?
-        #puts "redirect url"
+        puts "Redirect url" if @debug
         base_url = uri.to_s[0, uri.to_s.rindex('/')]
         new_url = URI.parse(construct_complete_url(base_url, res['Location']))
 
@@ -435,9 +442,7 @@ class Tree
       @data = TreeNode.new(key, value, 0)
     else
       # if the depth is 0 then don't add anything to the tree
-      if @max_depth == 0
-        return
-      end
+      return if @max_depth == 0
       if key == @data.value
         child = Tree.new(key, value, @data.depth + 1)
         @children << child
@@ -515,6 +520,7 @@ def usage
   exit 0
 end
 
+debug = false
 verbose = false
 ua = nil
 url = nil
@@ -701,6 +707,7 @@ catch :ctrl_c do
       s.headers['User-Agent'] = ua if ua
 
       s.add_url_check do |a_url|
+        puts "checking page #{a_url}" if debug
         allow = true
         # Extensions to ignore
         if a_url =~ /(\.zip$|\.gz$|\.zip$|\.bz2$|\.png$|\.gif$|\.jpg$|^#)/
@@ -717,7 +724,7 @@ catch :ctrl_c do
             if !offsite
               a_url_parsed = URI.parse(a_url)
               url_parsed = URI.parse(url)
-              #puts "comparing #{a_url} with #{url}"
+              puts "comparing #{a_url} with #{url}" if debug
 
               allow = (a_url_parsed.host == url_parsed.host)
 
@@ -809,6 +816,8 @@ catch :ctrl_c do
             keywords = $1
             body += keywords.gsub(/[>"\/']*/, "")
           end
+
+          puts body  if debug
 
           # This bit will not normally fire as all JavaScript is stripped out
           # by the Nokogiri remove a few lines before this.
@@ -929,7 +938,7 @@ catch :ctrl_c do
   end
 end
 
-# puts "end of main loop"
+puts "end of main loop" if debug
 
 if wordlist
   if verbose
@@ -953,7 +962,7 @@ if wordlist
   end
 end
 
-#puts "end of wordlist loop"
+puts "end of wordlist loop" if debug
 
 if email
   if email_arr.length == 0
@@ -977,7 +986,7 @@ if email
   end
 end
 
-#puts "end of email loop"
+puts "end of email loop" if debug
 
 if meta
   if usernames.length == 0
@@ -999,7 +1008,7 @@ if meta
   end
 end
 
-#puts "end of meta loop"
+puts "end of meta loop" if debug
 
 meta_outfile_file.close if meta_outfile
 email_outfile_file.close if email_outfile
