@@ -279,7 +279,7 @@ class MySpiderInstance<SpiderInstance
         puts "Message is #{e.to_s}"
       end
     rescue => e
-      puts "\nUnable to connect to the site (#{uri.host}:#{uri.port}#{uri.request_uri})"
+      puts "\nUnable to connect to the site (#{uri.scheme}://#{uri.host}:#{uri.port}#{uri.request_uri})"
 
       if @verbose
         puts "\nThe following error may help:"
@@ -292,7 +292,6 @@ class MySpiderInstance<SpiderInstance
       end
 
       puts "\n\n"
-      exit 2
     end
   end
 
@@ -774,10 +773,10 @@ catch :ctrl_c do
                   output_filename = meta_temp_dir + $1
                   puts "Keeping #{output_filename}" if verbose
                 else
-                  # Shouldn't ever get here as the regex above should always be able to pull the filename out of the url,
+                  # Shouldn't ever get here as the regex above should always be able to pull the filename out of the URL,
                   # ...but just in case
 
-                  # Maybe look at doing this to make the tmp name
+                  # Maybe look at doing this to make the temp name
                   # require "tempfile"
                   # Dir::Tmpname.make_tmpname "a", "b"
                   #  => "a20150707-8694-hrrxr4-b"
