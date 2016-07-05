@@ -23,7 +23,7 @@
 # filename/list: the file or list of files to check
 #
 # Author:: Robin Wood (robin@digininja.org)
-# Copyright:: Copyright (c) Robin Wood 2011
+# Copyright:: Copyright (c) Robin Wood 2016
 # Licence:: GPL
 #
 

@@ -1,7 +1,7 @@
 # == CeWL Library: Library to outsource reusable features
 #
 # Author:: Robin Wood (robin@digi.ninja)
-# Copyright:: Copyright (c) Robin Wood 2014
+# Copyright:: Copyright (c) Robin Wood 2016
 # Licence:: GPL
 #
 
@@ -42,7 +42,7 @@ end
 # This library contains functions to evaulate files found while running CeWL
 #
 # Author:: Robin Wood (dninja@gmail.com)
-# Copyright:: Copyright (c) Robin Wood 2010
+# Copyright:: Copyright (c) Robin Wood 2016
 # Licence:: GPL
 #
 
