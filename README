@@ -24,6 +24,24 @@ lists from already downloaded.
 Change Log
 ==========
 
+Version 5.2
+-----------
+
+Loads of changes including:
+
+* Code refactoring by @g0tmi1k
+* Internationalisation - should now handle non-ASCII sites much better
+* Found more ways to pull words out of JavaScript content and other areas
+  that aren't normal HTML
+* Lots of little bug fixes
+
+Version 5.1
+-----------
+
+Added the GPL-3+ licence to allow inclusion in Debian.
+
+Added a Gemfile to make installing gems easier.
+
 Version 5.0
 -----------
 
