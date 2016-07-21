@@ -271,8 +271,8 @@ class MySpiderInstance<SpiderInstance
       else
         block.call(res)
       end
-    rescue SocketError => e
-      puts "Couldn't hit the site moving on"
+    rescue SocketError, Errno::EHOSTUNREACH => e
+      puts "Couldn't hit the site #{uri}, moving on"
     rescue NoMethodError => e
       if @verbose
         puts "Unable to process URL"
