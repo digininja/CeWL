@@ -3,10 +3,10 @@ CeWL - Custom Word List generator
 
 Copyright(c) 2016, Robin Wood <robin@digininja.org>
 
-Based on a discussion on PaulDotCom about creating custom word lists by
+Based on a discussion on PaulDotCom (episode 129) about creating custom word lists
 spidering a targets website and collecting unique words I decided to write
 CeWL, the Custom Word List generator. CeWL is a ruby app which spiders a
-given url to a specified depth, optionally following external links, and
+given URL to a specified depth, optionally following external links, and
 returns a list of words which can then be used for password crackers such
 as John the Ripper.
 
@@ -20,6 +20,9 @@ written to a file rather than screen so the app can be automated.
 CeWL also has an associated command line app, FAB (Files Already Bagged)
 which uses the same meta data extraction techniques to create author/creator
 lists from already downloaded.
+
+Homepage: https://digi.ninja/projects/cewl.php
+GitHub: https://github.com/digininja/CeWL
 
 Change Log
 ==========
@@ -54,16 +57,16 @@ Version 4.3
 -----------
 
 CeWL now sorts the words found by count and optionally (new --count argument)
-includes the word count in the output.     I've left the words in the case
+includes the word count in the output. I've left the words in the case
 they are in the pages so "Product" is different to "product" I figure that if
 it is being used for password generation then the case may be significant so
-let the user strip it if they want to. There are also more improvments to the
+let the user strip it if they want to. There are also more improvements to the
 stability of the spider in this release.
 
 By default, CeWL sticks to just the site you have specified and will go to a
-depth of 2 links, this behaviour can be     changed by passing arguments. Be
+depth of 2 links, this behaviour can be changed by passing arguments. Be
 careful if setting a large depth and allowing it to go offsite, you could end
-up drifting on to     a lot of other domains. All words of three characters
+up drifting on to a lot of other domains. All words of three characters
 and over are output to stdout. This length can be increased and the words can
 be written to a file rather than screen so the app can be automated.
 
@@ -122,7 +125,7 @@ Version 3
 ---------
 
 Addresses a problem spotted by Josh Wright. The Spider gem doesn't handle
-JavaScript redirection URLs, for exmaple an index page containing just the
+JavaScript redirection URLs, for example an index page containing just the
 following:
 
 	<script language="JavaScript">
@@ -132,7 +135,7 @@ following:
 
 wasn't spidered because the redirect wasn't picked up. I now scan through a
 page looking for any lines containing location.href= and then add the given
-URL to the list of pages to spider. 
+URL to the list of pages to spider.
 
 Version 2
 ---------
@@ -173,7 +176,7 @@ Usage: cewl [OPTION] ... URL
 	--min_word_length, -m: minimum word length, default 3
 	--offsite, -o: let the spider visit other sites
 	--write, -w file: write the output to the file
-	--ua, -u user-agent: useragent to send
+	--ua, -u user-agent: user agent to send
 	--no-words, -n: don't output the wordlist
 	--meta, -a include meta data
 	--meta_file file: file for metadata output
@@ -196,6 +199,6 @@ UK: England & Wales
 ( http://creativecommons.org/licenses/by-sa/2.0/uk/ )
 
 
-Alternativelly, you can use GPL-3+ instead the of the original license.
+Alternatively, you can use GPL-3+ instead the of the original license.
 
 ( http://opensource.org/licenses/GPL-3.0 )
