@@ -100,6 +100,8 @@ class MySpider<Spider
   @@proxy_username = nil
   @@proxy_password = nil
 
+  @@headers = nil
+
   @@auth_type = nil
   @@auth_user = nil
   @@auth_password = nil
