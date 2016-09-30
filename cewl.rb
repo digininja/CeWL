@@ -116,6 +116,19 @@ class MySpider<Spider
 		@@proxy_password = password
 	end
 
+	def self.headers (headers)
+		header_hash = {}
+		headers.each do |header|
+			header_split = header.split(":")
+			if (header_split.count == 2)
+				header_hash[header_split[0].strip] = header_split[1].strip
+			else
+				puts "Invalid header: " + header.inspect
+			end
+		end
+		@@headers = header_hash
+	end
+
 	def self.auth_creds (type, user, password)
 		@@auth_type = type
 		@@auth_user = user
@@ -134,6 +147,9 @@ class MySpider<Spider
 	def self.start_at(a_url, &block)
 		rules = RobotRules.new('Ruby Spider 1.0')
 		a_spider = MySpiderInstance.new({nil => a_url}, [], rules, [])
+
+		a_spider.headers = @@headers
+
 		a_spider.auth_type = @@auth_type
 		a_spider.auth_user = @@auth_user
 		a_spider.auth_password = @@auth_password
@@ -156,6 +172,8 @@ class MySpiderInstance<SpiderInstance
 	attr_writer :auth_type
 	attr_writer :auth_user
 	attr_writer :auth_password
+
+	attr_writer :headers
 
 	attr_writer :proxy_host
 	attr_writer :proxy_port
@@ -234,7 +252,10 @@ class MySpiderInstance<SpiderInstance
 				end
 			end
 
-			req = Net::HTTP::Get.new(uri.request_uri, @headers)
+			req = Net::HTTP::Get.new(uri.request_uri)
+			@headers.each_pair do |header, value|
+				req[header] = value
+			end
 
 			if @auth_type
 				case @auth_type
@@ -481,6 +502,7 @@ opts = GetoptLong.new(
 		['--auth_user', GetoptLong::REQUIRED_ARGUMENT],
 		['--auth_pass', GetoptLong::REQUIRED_ARGUMENT],
 		['--auth_type', GetoptLong::REQUIRED_ARGUMENT],
+		['--header', "-H", GetoptLong::REQUIRED_ARGUMENT],
 		['--proxy_host', GetoptLong::REQUIRED_ARGUMENT],
 		['--proxy_port', GetoptLong::REQUIRED_ARGUMENT],
 		['--proxy_username', GetoptLong::REQUIRED_ARGUMENT],
@@ -507,15 +529,18 @@ def usage
 	--count, -c: show the count for each word found
 
 	Authentication
-	--auth_type: digest or basic
-	--auth_user: authentication username
-	--auth_pass: authentication password
+		--auth_type: digest or basic
+		--auth_user: authentication username
+		--auth_pass: authentication password
 
 	Proxy Support
-	--proxy_host: proxy host
-	--proxy_port: proxy port, default 8080
-	--proxy_username: username for proxy, if required
-	--proxy_password: password for proxy, if required
+		--proxy_host: proxy host
+		--proxy_port: proxy port, default 8080
+		--proxy_username: username for proxy, if required
+		--proxy_password: password for proxy, if required
+
+	Headers
+		--header, -H: in format name:value - can pass multiple
 
 	--verbose, -v: verbose
 
@@ -549,6 +574,10 @@ proxy_host = nil
 proxy_port = nil
 proxy_username = nil
 proxy_password = nil
+
+# headers will be passed in in the format "header: value"
+# and there can be multiple
+headers = []
 
 strip_css = true
 strip_js = true
@@ -599,6 +628,8 @@ begin
 				verbose = true
 			when '--write'
 				outfile = arg
+			when "--header"
+				headers << arg
 			when "--proxy_password"
 				proxy_password = arg
 			when "--proxy_username"
@@ -706,7 +737,9 @@ catch :ctrl_c do
 
 		MySpider.proxy(proxy_host, proxy_port, proxy_username, proxy_password) if proxy_host
 		MySpider.auth_creds(auth_type, auth_user, auth_pass) if auth_type
+		MySpider.headers(headers)
 		MySpider.verbose(verbose)
+		MySpider.debug(debug)
 
 		MySpider.start_at(url) do |s|
 			s.headers['User-Agent'] = ua if ua
