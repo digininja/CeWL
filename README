@@ -27,6 +27,13 @@ GitHub: https://github.com/digininja/CeWL
 Change Log
 ==========
 
+Version 5.3
+-----------
+
+Added the command line argument --header (-H) to allow headers to be passed in.
+Parameters are specified in name:value pairs and you can pass multiple.
+
+
 Version 5.2
 -----------
 
@@ -172,6 +179,7 @@ Usage
 =====
 Usage: cewl [OPTION] ... URL
 	--help, -h: show help
+	--keep, -k: keep the downloaded file
 	--depth x, -d x: depth to spider to, default 2
 	--min_word_length, -m: minimum word length, default 3
 	--offsite, -o: let the spider visit other sites
@@ -179,11 +187,27 @@ Usage: cewl [OPTION] ... URL
 	--ua, -u user-agent: user agent to send
 	--no-words, -n: don't output the wordlist
 	--meta, -a include meta data
-	--meta_file file: file for metadata output
+	--meta_file file: output file for meta data
 	--email, -e include email addresses
-	--email_file file: file for email output
+	--email_file file: output file for email addresses
 	--meta-temp-dir directory: the temporary directory used by exiftool when parsing files, default /tmp
-	-v: verbose
+	--count, -c: show the count for each word found
+
+	Authentication
+		--auth_type: digest or basic
+		--auth_user: authentication username
+		--auth_pass: authentication password
+
+	Proxy Support
+		--proxy_host: proxy host
+		--proxy_port: proxy port, default 8080
+		--proxy_username: username for proxy, if required
+		--proxy_password: password for proxy, if required
+
+	Headers
+		--header, -H: in format name:value - can pass multiple
+
+	--verbose, -v: verbose
 
 	URL: The site to spider.
 
