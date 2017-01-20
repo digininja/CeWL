@@ -173,7 +173,7 @@ mini_exiftool gem also requires the exiftool application to be installed.
 Then just save CeWL to a directory and make it executable.
 
 The project page on my site gives some tips on solving common problems people
-have encountered while running CeWL - http://www.digininja.org/projects/cewl.php
+have encountered while running CeWL - https://digi.ninja/projects/cewl.php
 
 Usage
 =====
