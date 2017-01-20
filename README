@@ -27,12 +27,17 @@ GitHub: https://github.com/digininja/CeWL
 Change Log
 ==========
 
+Version 5.3.1
+-------------
+
+Added the ability to handle non-standard port numbers.
+Added lots more debugging and a new --debug parameter.
+
 Version 5.3
 -----------
 
 Added the command line argument --header (-H) to allow headers to be passed in.
 Parameters are specified in name:value pairs and you can pass multiple.
-
 
 Version 5.2
 -----------
