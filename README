@@ -1,7 +1,7 @@
 CeWL - Custom Word List generator
 =================================
 
-Copyright(c) 2016, Robin Wood <robin@digi.ninja>
+Copyright(c) 2017, Robin Wood <robin@digi.ninja>
 
 Based on a discussion on PaulDotCom (episode 129) about creating custom word lists
 spidering a targets website and collecting unique words I decided to write
@@ -26,6 +26,12 @@ GitHub: https://github.com/digininja/CeWL
 
 Change Log
 ==========
+
+Version 5.4
+-----------
+
+Steven van der Baan added the ability to hit ctrl-c and keep the results
+so far.
 
 Version 5.3
 -----------
