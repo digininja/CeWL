@@ -86,9 +86,9 @@ rescue LoadError => e
 	end
 end
 
-# Doesn't work for some reason, maybe
-# because its bouncing into different classes
-trap("SIGINT") { throw :ctrl_c }
+# # Doesn't work for some reason, maybe
+# # because its bouncing into different classes
+# trap("SIGINT") { throw :ctrl_c }
 
 require './cewl_lib'
 
@@ -183,6 +183,8 @@ class MySpiderInstance<SpiderInstance
 	attr_writer :verbose
 	attr_writer :debug
 
+	attr_writer :interrupt
+
 	# Force all files to be allowed
 	# Normally the robots.txt file will be honoured
 	def allowed?(a_url, parsed_url)
@@ -190,8 +192,7 @@ class MySpiderInstance<SpiderInstance
 	end
 
 	def start! #:nodoc:
-		interrupted = false
-		trap("SIGINT") { interrupted = true }
+		trap("SIGINT") { puts 'Hold on, about to stop ...'; @interrupt = true }
 		begin
 			next_urls = @next_urls.pop
 			#tmp_n_u = {}
@@ -221,7 +222,7 @@ class MySpiderInstance<SpiderInstance
 					end
 
 					@teardown.call(a_url) unless @teardown.nil?
-					exit if interrupted
+					throw :ctrl_c if @interrupt
 				end
 			end
 		end while !@next_urls.empty?
@@ -230,6 +231,7 @@ class MySpiderInstance<SpiderInstance
 	def get_page(uri, &block) #:nodoc:
 		@seen << uri
 
+		trap("SIGINT") { puts 'Hold on, stopping here ...'; @interrupt = true }
 		begin
 			if @proxy_host.nil?
 				http = Net::HTTP.new(uri.host, uri.port)
@@ -279,7 +281,7 @@ class MySpiderInstance<SpiderInstance
 			end
 
 			res = http.request(req)
-
+			
 			if res.redirect?
 				puts "Redirect URL" if @debug
 				base_url = uri.to_s[0, uri.to_s.rindex('/')]
