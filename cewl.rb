@@ -328,14 +328,17 @@ class MySpiderInstance<SpiderInstance
 		case parsed_additional_url.scheme
 			when nil
 				u = base_url.is_a?(URI) ? base_url : URI.parse(base_url)
+				# Get whole authority from the base_url
+				base_authority = u.to_s[u.scheme.length+3..u.to_s.index(u.path)-1] 
+
 				if additional_url[0].chr == '/'
-					"#{u.scheme}://#{u.host}#{additional_url}"
+					"#{u.scheme}://#{base_authority}#{additional_url}"
 				elsif u.path.nil? || u.path == ''
-					"#{u.scheme}://#{u.host}/#{additional_url}"
+					"#{u.scheme}://#{base_authority}/#{additional_url}"
 				elsif u.path[0].chr == '/'
-					"#{u.scheme}://#{u.host}#{u.path}/#{additional_url}"
+					"#{u.scheme}://#{base_authority}#{u.path}/#{additional_url}"
 				else
-					"#{u.scheme}://#{u.host}/#{u.path}/#{additional_url}"
+					"#{u.scheme}://#{base_authority}/#{u.path}/#{additional_url}"
 				end
 			else
 				additional_url
