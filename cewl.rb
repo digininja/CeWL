@@ -63,7 +63,7 @@
 # Licence:: CC-BY-SA 2.0 or GPL-3+
 #
 
-VERSION = "5.3.1 (Any port in a storm)"
+VERSION = "5.4.1 (Break Out)"
 
 puts "CeWL #{VERSION} Robin Wood (robin@digi.ninja) (https://digi.ninja/)\n"
 
@@ -85,10 +85,6 @@ rescue LoadError => e
 		exit 2
 	end
 end
-
-# Doesn't work for some reason, maybe
-# because its bouncing into different classes
-trap("SIGINT") { throw :ctrl_c }
 
 require './cewl_lib'
 
@@ -183,6 +179,8 @@ class MySpiderInstance<SpiderInstance
 	attr_writer :verbose
 	attr_writer :debug
 
+	attr_writer :interrupt
+
 	# Force all files to be allowed
 	# Normally the robots.txt file will be honoured
 	def allowed?(a_url, parsed_url)
@@ -190,8 +188,7 @@ class MySpiderInstance<SpiderInstance
 	end
 
 	def start! #:nodoc:
-		interrupted = false
-		trap("SIGINT") { interrupted = true }
+		trap("SIGINT") { puts 'Hold on, about to stop ...'; @interrupt = true }
 		begin
 			next_urls = @next_urls.pop
 			#tmp_n_u = {}
@@ -221,7 +218,7 @@ class MySpiderInstance<SpiderInstance
 					end
 
 					@teardown.call(a_url) unless @teardown.nil?
-					exit if interrupted
+					throw :ctrl_c if @interrupt
 				end
 			end
 		end while !@next_urls.empty?
@@ -230,6 +227,7 @@ class MySpiderInstance<SpiderInstance
 	def get_page(uri, &block) #:nodoc:
 		@seen << uri
 
+		trap("SIGINT") { puts 'Hold on, stopping here ...'; @interrupt = true }
 		begin
 			if @proxy_host.nil?
 				http = Net::HTTP.new(uri.host, uri.port)
@@ -324,21 +322,21 @@ class MySpiderInstance<SpiderInstance
 		return nil if additional_url =~ /^#/
 
 		parsed_additional_url ||= URI.parse(additional_url)
-		case parsed_additional_url.scheme
-			when nil
-				u = base_url.is_a?(URI) ? base_url : URI.parse(base_url)
-				if additional_url[0].chr == '/'
-					"#{u.scheme}://#{u.host}:#{u.port}#{additional_url}"
-				elsif u.path.nil? || u.path == ''
-					"#{u.scheme}://#{u.host}:#{u.port}/#{additional_url}"
-				elsif u.path[0].chr == '/'
-					"#{u.scheme}://#{u.host}:#{u.port}#{u.path}/#{additional_url}"
-				else
-					"#{u.scheme}://#{u.host}:#{u.port}/#{u.path}/#{additional_url}"
-				end
+		if parsed_additional_url.scheme.nil?
+			u = base_url.is_a?(URI) ? base_url : URI.parse(base_url)
+			if additional_url[0].chr == '/'
+				url = "#{u.scheme}://#{u.host}:#{u.port}#{additional_url}"
+			elsif u.path.nil? || u.path == ''
+				url = "#{u.scheme}://#{u.host}:#{u.port}/#{additional_url}"
+			elsif u.path[0].chr == '/'
+				url = "#{u.scheme}://#{u.host}:#{u.port}#{u.path}/#{additional_url}"
 			else
-				additional_url
+				url = "#{u.scheme}://#{u.host}:#{u.port}/#{u.path}/#{additional_url}"
+			end
+		else
+			url = additional_url
 		end
+		return url
 	end
 
 	# Overriding the original spider one as it doesn't find hrefs very well
@@ -357,8 +355,8 @@ class MySpiderInstance<SpiderInstance
 
 		doc = Nokogiri::HTML(web_page)
 		links = doc.css('a').map { |a| a['href'] }
-		puts "links = #{links.inspect}" if @debug
 
+		puts "links = #{links.inspect}" if @debug
 		links.map do |link|
 			begin
 				if link.nil?
@@ -485,7 +483,7 @@ class Tree
 			else
 				@children.each { |node|
 					if node.data.value == key && node.data.depth<@max_depth
-						child = Tree.new(key, value, node.data.depth + 1, self.debug)
+						child = Tree.new(key, value, node.data.depth + 1, @debug)
 						@children << child
 					end
 				}
@@ -497,7 +495,7 @@ end
 opts = GetoptLong.new(
 		['--help', '-h', GetoptLong::NO_ARGUMENT],
 		['--keep', '-k', GetoptLong::NO_ARGUMENT],
-		['--depth', '-d', GetoptLong::OPTIONAL_ARGUMENT],
+		['--depth', '-d', GetoptLong::REQUIRED_ARGUMENT],
 		['--min_word_length', "-m", GetoptLong::REQUIRED_ARGUMENT],
 		['--no-words', "-n", GetoptLong::NO_ARGUMENT],
 		['--offsite', "-o", GetoptLong::NO_ARGUMENT],
@@ -784,6 +782,8 @@ catch :ctrl_c do
 							allow = (a_url_parsed.host == url_parsed.host) && (a_url_parsed.port == url_parsed.port) && (a_url_parsed.scheme == url_parsed.scheme) ? true : false
 
 							puts "Offsite link, not following: #{a_url}" if !allow && verbose
+						else
+							puts "Allowing offsite links" if @debug
 						end
 					end
 				end
@@ -852,6 +852,8 @@ catch :ctrl_c do
 					end
 				else
 					html = resp.body.to_s.force_encoding("UTF-8")
+					# This breaks on this site http://www.spisa.nu/recept/ as the
+					# replace replaces some of the important characters. Needs a fix
 					html.encode!('UTF-16', 'UTF-8', :invalid => :replace, :replace => '')
 					html.encode!('UTF-8', 'UTF-16')
 
