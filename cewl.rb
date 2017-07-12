@@ -63,7 +63,7 @@
 # Licence:: CC-BY-SA 2.0 or GPL-3+
 #
 
-VERSION = "5.4.1 (Break Out)"
+VERSION = "5.4 (Break Out)"
 
 puts "CeWL #{VERSION} Robin Wood (robin@digi.ninja) (https://digi.ninja/)\n"
 
@@ -277,7 +277,7 @@ class MySpiderInstance<SpiderInstance
 			end
 
 			res = http.request(req)
-
+			
 			if res.redirect?
 				puts "Redirect URL" if @debug
 				base_url = uri.to_s[0, uri.to_s.rindex('/')]
