@@ -86,10 +86,6 @@ rescue LoadError => e
 	end
 end
 
-# # Doesn't work for some reason, maybe
-# # because its bouncing into different classes
-# trap("SIGINT") { throw :ctrl_c }
-
 require './cewl_lib'
 
 # Doing this so I can override the allowed? function which normally checks
@@ -302,6 +298,7 @@ class MySpiderInstance<SpiderInstance
 			if @verbose
 				puts "Unable to process URL"
 				puts "Message is #{e.to_s}"
+				puts e.backtrace
 			end
 		rescue => e
 			puts "\nUnable to connect to the site (#{uri.scheme}://#{uri.host}:#{uri.port}#{uri.request_uri})"
@@ -325,34 +322,41 @@ class MySpiderInstance<SpiderInstance
 		return nil if additional_url =~ /^#/
 
 		parsed_additional_url ||= URI.parse(additional_url)
-		case parsed_additional_url.scheme
-			when nil
-				u = base_url.is_a?(URI) ? base_url : URI.parse(base_url)
-				if additional_url[0].chr == '/'
-					"#{u.scheme}://#{u.host}#{additional_url}"
-				elsif u.path.nil? || u.path == ''
-					"#{u.scheme}://#{u.host}/#{additional_url}"
-				elsif u.path[0].chr == '/'
-					"#{u.scheme}://#{u.host}#{u.path}/#{additional_url}"
-				else
-					"#{u.scheme}://#{u.host}/#{u.path}/#{additional_url}"
-				end
+		if parsed_additional_url.scheme.nil?
+			u = base_url.is_a?(URI) ? base_url : URI.parse(base_url)
+			if additional_url[0].chr == '/'
+				url = "#{u.scheme}://#{u.host}:#{u.port}#{additional_url}"
+			elsif u.path.nil? || u.path == ''
+				url = "#{u.scheme}://#{u.host}:#{u.port}/#{additional_url}"
+			elsif u.path[0].chr == '/'
+				url = "#{u.scheme}://#{u.host}:#{u.port}#{u.path}/#{additional_url}"
 			else
-				additional_url
+				url = "#{u.scheme}://#{u.host}:#{u.port}/#{u.path}/#{additional_url}"
+			end
+		else
+			url = additional_url
 		end
+		return url
 	end
 
 	# Overriding the original spider one as it doesn't find hrefs very well
 	def generate_next_urls(a_url, resp) #:nodoc:
+		if @debug
+			puts "a_url = #{a_url}"
+			puts "resp = #{resp}"
+		end
 		web_page = resp.body
 		if URI.parse(a_url).path.empty?
 			base_url = a_url
 		else
 			base_url = a_url[0, a_url.rindex('/')]
 		end
+		puts "base_url: #{base_url}" if @debug
 
 		doc = Nokogiri::HTML(web_page)
 		links = doc.css('a').map { |a| a['href'] }
+
+		puts "links = #{links.inspect}" if @debug
 		links.map do |link|
 			begin
 				if link.nil?
@@ -405,7 +409,8 @@ end
 # A tree structure
 class Tree
 	attr :data
-	@max_depth
+	attr_writer :debug
+	attr_writer :max_depth
 	@children
 
 	# Get the maximum depth the tree can grow to
@@ -431,7 +436,7 @@ class Tree
 	end
 
 	# The constructor
-	def initialize(key=nil, value=nil, depth=0)
+	def initialize(key=nil, value=nil, depth=0, debug=false)
 		@data = TreeNode.new(key, value, depth)
 		@children = []
 		@max_depth = 2
@@ -463,6 +468,7 @@ class Tree
 
 	# Push an item onto the tree
 	def push(value)
+		puts "Pushing #{value}" if @debug
 		key = value.keys.first
 		value = value.values_at(key).first
 
@@ -472,12 +478,12 @@ class Tree
 			# If the depth is 0 then don't add anything to the tree
 			return if @max_depth == 0
 			if key == @data.value
-				child = Tree.new(key, value, @data.depth + 1)
+				child = Tree.new(key, value, @data.depth + 1, @debug)
 				@children << child
 			else
 				@children.each { |node|
 					if node.data.value == key && node.data.depth<@max_depth
-						child = Tree.new(key, value, node.data.depth + 1)
+						child = Tree.new(key, value, node.data.depth + 1, @debug)
 						@children << child
 					end
 				}
@@ -489,7 +495,7 @@ end
 opts = GetoptLong.new(
 		['--help', '-h', GetoptLong::NO_ARGUMENT],
 		['--keep', '-k', GetoptLong::NO_ARGUMENT],
-		['--depth', '-d', GetoptLong::OPTIONAL_ARGUMENT],
+		['--depth', '-d', GetoptLong::REQUIRED_ARGUMENT],
 		['--min_word_length', "-m", GetoptLong::REQUIRED_ARGUMENT],
 		['--no-words', "-n", GetoptLong::NO_ARGUMENT],
 		['--offsite', "-o", GetoptLong::NO_ARGUMENT],
@@ -509,7 +515,8 @@ opts = GetoptLong.new(
 		['--proxy_port', GetoptLong::REQUIRED_ARGUMENT],
 		['--proxy_username', GetoptLong::REQUIRED_ARGUMENT],
 		['--proxy_password', GetoptLong::REQUIRED_ARGUMENT],
-		["--verbose", "-v", GetoptLong::NO_ARGUMENT]
+		["--verbose", "-v", GetoptLong::NO_ARGUMENT],
+		["--debug", GetoptLong::NO_ARGUMENT]
 )
 
 # Display the usage
@@ -545,6 +552,7 @@ def usage
 		--header, -H: in format name:value - can pass multiple
 
 	--verbose, -v: verbose
+	--debug: extra debug information
 
 	URL: The site to spider.
 
@@ -626,6 +634,8 @@ begin
 				offsite = true
 			when '--ua'
 				ua = arg
+			when '--debug'
+				debug = true
 			when '--verbose'
 				verbose = true
 			when '--write'
@@ -696,6 +706,7 @@ end
 word_hash = {}
 email_arr = []
 url_stack = Tree.new
+url_stack.debug = debug
 url_stack.max_depth = depth
 usernames = Array.new()
 
@@ -771,6 +782,8 @@ catch :ctrl_c do
 							allow = (a_url_parsed.host == url_parsed.host) && (a_url_parsed.port == url_parsed.port) && (a_url_parsed.scheme == url_parsed.scheme) ? true : false
 
 							puts "Offsite link, not following: #{a_url}" if !allow && verbose
+						else
+							puts "Allowing offsite links" if @debug
 						end
 					end
 				end
@@ -839,6 +852,8 @@ catch :ctrl_c do
 					end
 				else
 					html = resp.body.to_s.force_encoding("UTF-8")
+					# This breaks on this site http://www.spisa.nu/recept/ as the
+					# replace replaces some of the important characters. Needs a fix
 					html.encode!('UTF-16', 'UTF-8', :invalid => :replace, :replace => '')
 					html.encode!('UTF-8', 'UTF-16')
 
@@ -858,7 +873,7 @@ catch :ctrl_c do
 						body += keywords.gsub(/[>"\/']*/, "")
 					end
 
-					puts body	if debug
+					puts body if debug
 
 					# This bit will not normally fire as all JavaScript is stripped out
 					# by the Nokogiri remove a few lines before this.

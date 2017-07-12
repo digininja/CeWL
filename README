@@ -27,18 +27,24 @@ GitHub: https://github.com/digininja/CeWL
 Change Log
 ==========
 
+=======
 Version 5.4
 -----------
 
 Steven van der Baan added the ability to hit ctrl-c and keep the results
 so far.
 
+Version 5.3.1
+-------------
+
+Added the ability to handle non-standard port numbers.
+Added lots more debugging and a new --debug parameter.
+
 Version 5.3
 -----------
 
 Added the command line argument --header (-H) to allow headers to be passed in.
 Parameters are specified in name:value pairs and you can pass multiple.
-
 
 Version 5.2
 -----------
@@ -179,7 +185,7 @@ mini_exiftool gem also requires the exiftool application to be installed.
 Then just save CeWL to a directory and make it executable.
 
 The project page on my site gives some tips on solving common problems people
-have encountered while running CeWL - http://www.digininja.org/projects/cewl.php
+have encountered while running CeWL - https://digi.ninja/projects/cewl.php
 
 Usage
 =====
