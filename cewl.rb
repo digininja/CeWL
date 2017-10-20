@@ -293,7 +293,7 @@ class MySpiderInstance<SpiderInstance
 				block.call(res)
 			end
 		rescue Zlib::DataError => e
-			puts "Caught Os3r3um's header error on #{uri}, moving on regardless"
+			puts "Error in Zlib decompressing data on #{uri}, moving on regardless"
 		rescue SocketError, Errno::EHOSTUNREACH => e
 			puts "Couldn't hit the site #{uri}, moving on"
 		rescue NoMethodError => e
