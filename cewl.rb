@@ -63,7 +63,7 @@
 # Licence:: CC-BY-SA 2.0 or GPL-3+
 #
 
-VERSION = "5.4 (Break Out)"
+VERSION = "5.4.1 (Break Out)"
 
 puts "CeWL #{VERSION} Robin Wood (robin@digi.ninja) (https://digi.ninja/)\n"
 
@@ -702,7 +702,7 @@ url = "http://#{url}" if url !~ /^http(s)?:\/\//
 # The spider doesn't work properly if there isn't a / on the end
 if url !~ /\/$/
 	# Commented out for Yori
-	#url = "#{url}/"
+	url = "#{url}/"
 end
 
 word_hash = {}
