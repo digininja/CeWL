@@ -28,6 +28,12 @@ Change Log
 ==========
 
 =======
+Version 5.4.1
+-------------
+A line to add a / to the end of the URL had been commented out. I don't
+remember why it was done but I'm putting it back in. See issue
+https://github.com/digininja/CeWL/issues/26
+
 Version 5.4
 -----------
 

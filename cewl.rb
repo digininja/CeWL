@@ -701,7 +701,6 @@ url = "http://#{url}" if url !~ /^http(s)?:\/\//
 
 # The spider doesn't work properly if there isn't a / on the end
 if url !~ /\/$/
-	# Commented out for Yori
 	url = "#{url}/"
 end
 
