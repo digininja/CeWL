@@ -523,40 +523,41 @@ opts = GetoptLong.new(
 
 # Display the usage
 def usage
-	puts "Usage: cewl [OPTION] ... URL
-	--help, -h: show help
-	--keep, -k: keep the downloaded file
-	--depth x, -d x: depth to spider to, default 2
-	--min_word_length, -m: minimum word length, default 3
-	--offsite, -o: let the spider visit other sites
-	--write, -w file: write the output to the file
-	--ua, -u user-agent: user agent to send
-	--no-words, -n: don't output the wordlist
-	--meta, -a include meta data
-	--meta_file file: output file for meta data
-	--email, -e include email addresses
-	--email_file file: output file for email addresses
-	--meta-temp-dir directory: the temporary directory used by exiftool when parsing files, default /tmp
-	--count, -c: show the count for each word found
+	puts "Usage: cewl [OPTIONS] ... <url>
 
-	Authentication
-		--auth_type: digest or basic
-		--auth_user: authentication username
-		--auth_pass: authentication password
-
-	Proxy Support
-		--proxy_host: proxy host
-		--proxy_port: proxy port, default 8080
-		--proxy_username: username for proxy, if required
-		--proxy_password: password for proxy, if required
-
-	Headers
-		--header, -H: in format name:value - can pass multiple
-
-	--verbose, -v: verbose
-	--debug: extra debug information
-
-	URL: The site to spider.
+	OPTIONS:
+		-h, --help: Show help.
+		-k, --keep: Keep the downloaded file.
+		-d <x>,--depth <x>: Depth to spider to, default 2.
+		-m, --min_word_length: Minimum word length, default 3.
+		-o, --offsite: Let the spider visit other sites.
+		-w, --write: Write the output to the file.
+		-u, --ua <agent>: User agent to send.
+		-n, --no-words: Don't output the wordlist.
+		-a, --meta: include meta data.
+		--meta_file file: Output file for meta data.
+		-e, --email: Include email addresses.
+		--email_file <file>: Output file for email addresses.
+		--meta-temp-dir <dir>: The temporary directory used by exiftool when parsing files, default /tmp.
+		-c, --count: Show the count for each word found.
+		-v, --verbose: Verbose.
+		--debug: Extra debug information.
+      
+	AUTHENTICATION:
+		--auth_type: Digest or basic.
+		--auth_user: Authentication username.
+		--auth_pass: Authentication password.
+      
+	PROXY SUPPORT:
+		--proxy_host: Proxy host.
+		--proxy_port: Proxy port, default 8080.
+		--proxy_username: Username for proxy, if required.
+		--proxy_password: Password for proxy, if required.
+      
+	HEADERS:
+		--header, -H: In format name:value - can pass multiple.
+      
+	<url>: The site to spider.
 
 "
 	exit 0
