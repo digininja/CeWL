@@ -64,7 +64,7 @@
 # Licence:: CC-BY-SA 2.0 or GPL-3+
 #
 
-VERSION = "5.4.1 (Break Out)"
+VERSION = "5.4.2 (Break Out)"
 
 puts "CeWL #{VERSION} Robin Wood (robin@digi.ninja) (https://digi.ninja/)\n"
 
@@ -78,7 +78,7 @@ rescue LoadError => e
 	if e.to_s =~ /cannot load such file -- (.*)/
 		missing_gem = $1
 		puts "\nError: #{missing_gem} gem not installed\n"
-		puts "\t Use: 'gem install #{missing_gem}' to install the required gem\n\n"
+		puts "    Run 'bundle install' to install all the required gems\n\n"
 		exit 2
 	else
 		puts "There was an error loading the gems:\n"
