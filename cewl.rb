@@ -544,7 +544,7 @@ def usage
 	-v, --verbose: Verbose.
 	--debug: Extra debug information.
       
-	Authentications
+	Authentication
 	--auth_type: Digest or basic.
 	--auth_user: Authentication username.
 	--auth_pass: Authentication password.
