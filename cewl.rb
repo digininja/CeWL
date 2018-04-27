@@ -188,6 +188,20 @@ class MySpiderInstance<SpiderInstance
 		true
 	end
 
+	# Lifted from the original gem to fix the case statement
+	# which checked for Fixednum not Integer as
+	# Fixednum has been deprecated.
+	# 
+	def on(code, p = nil, &block)
+		f = p ? p : block
+		case code
+		when Integer
+			@callbacks[code] = f
+		else
+			@callbacks[code.to_sym] = f
+		end
+	end
+
 	def start! #:nodoc:
 		trap("SIGINT") { puts 'Hold on, about to stop ...'; @interrupt = true }
 		begin
