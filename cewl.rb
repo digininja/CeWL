@@ -981,7 +981,7 @@ catch :ctrl_c do
 
 						if wordlist
 							# Remove any symbols
-							words.gsub!(/[^[:alpha:]]/i, " ")
+							words.gsub!(/[^a-z0-9]/i, " ")
 
 							# Add to the array
 							words.split(" ").each do |word|
