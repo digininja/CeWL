@@ -27,7 +27,10 @@ GitHub: https://github.com/digininja/CeWL
 Change Log
 ==========
 
-=======
+Version 5.4.3
+-------------
+Added the --with-number parameter to make words include letters and numbers
+
 Version 5.4.2
 -------------
 Merged an update to change the way usage instructions are shown.
