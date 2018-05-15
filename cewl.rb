@@ -8,63 +8,15 @@
 # * A word list of all unique words found on the target site
 # * A list of all email addresses found in mailto links
 # * A list of usernames/author details from meta data found in any documents on the site
-#"Display the usage" msg clean up #28
-
-# == Usage
-#
-# cewl [OPTION] ... URL
-#
-# -h, --help:
-#	 show help
-#
-# --depth x, -d x:
-#	 depth to spider to, default 2
-#
-# --min_word_length, -m:
-#	 minimum word length, default 3
-#
-# --email file, -e
-# --email_file file:
-#	 include any email addresses found during the spider, email_file is optional output file, if
-#	 not included the output is added to default output
-#
-# --meta file, -a
-# --meta_file file:
-#	 include any meta data found during the spider, meta_file is optional output file, if
-#	 not included the output is added to default output
-#
-# --no-words, -n
-#	 don't output the wordlist
-#
-# --offsite, -o:
-#	 let the spider visit other sites
-#
-# --write, -w file:
-#	 write the words to the file
-#
-# --ua, -u user-agent:
-#	 useragent to send
-#
-# --meta-temp-dir directory:
-#	 the temporary directory used by exiftool when parsing files, default /tmp
-#
-# --keep, -k:
-#	 keep the documents that are downloaded
-#
-# --count, -c:
-#	 show the count for each of the words found
-#
-# -v
-#	 verbose
 #
 # URL: The site to spider.
 #
 # Author:: Robin Wood (robin@digi.ninja)
-# Copyright:: Copyright (c) Robin Wood 2016
+# Copyright:: Copyright (c) Robin Wood 2018
 # Licence:: CC-BY-SA 2.0 or GPL-3+
 #
 
-VERSION = "5.4.2 (Break Out)"
+VERSION = "5.4.3 (Arkanoid)"
 
 puts "CeWL #{VERSION} Robin Wood (robin@digi.ninja) (https://digi.ninja/)\n"
 
@@ -521,6 +473,7 @@ opts = GetoptLong.new(
 		['--meta-temp-dir', GetoptLong::REQUIRED_ARGUMENT],
 		['--meta_file', GetoptLong::REQUIRED_ARGUMENT],
 		['--email_file', GetoptLong::REQUIRED_ARGUMENT],
+		['--with-numbers', GetoptLong::NO_ARGUMENT],
 		['--meta', "-a", GetoptLong::NO_ARGUMENT],
 		['--email', "-e", GetoptLong::NO_ARGUMENT],
 		['--count', '-c', GetoptLong::NO_ARGUMENT],
@@ -549,6 +502,7 @@ def usage
 	-w, --write: Write the output to the file.
 	-u, --ua <agent>: User agent to send.
 	-n, --no-words: Don't output the wordlist.
+	--with-numbers: Accept words with numbers in as well as just letters
 	-a, --meta: include meta data.
 	--meta_file file: Output file for meta data.
 	-e, --email: Include email addresses.
@@ -593,6 +547,7 @@ meta = false
 wordlist = true
 meta_temp_dir = "/tmp/"
 keep = false
+words_with_numbers = false
 show_count = false
 auth_type = nil
 auth_user = nil
@@ -615,6 +570,8 @@ begin
 		case opt
 			when '--help'
 				usage
+			when "--with-numbers"
+				words_with_numbers = true
 			when "--count"
 				show_count = true
 			when "--meta-temp-dir"
@@ -981,7 +938,11 @@ catch :ctrl_c do
 
 						if wordlist
 							# Remove any symbols
-							words.gsub!(/[^a-z0-9]/i, " ")
+							if words_with_numbers then
+								words.gsub!(/[^a-z0-9]/i, " ")
+							else
+								words.gsub!(/[^a-z]/i, " ")
+							end
 
 							# Add to the array
 							words.split(" ").each do |word|
