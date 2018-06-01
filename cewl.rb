@@ -39,7 +39,7 @@ rescue LoadError => e
 	end
 end
 
-require './cewl_lib'
+require_relative 'cewl_lib'
 
 # Doing this so I can override the allowed? function which normally checks
 # the robots.txt file
