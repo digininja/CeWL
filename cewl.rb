@@ -939,9 +939,9 @@ catch :ctrl_c do
 						if wordlist
 							# Remove any symbols
 							if words_with_numbers then
-								words.gsub!(/[^a-z0-9]/i, " ")
+								words.gsub!(/[^[[:alnum:]]]/i, " ")
 							else
-								words.gsub!(/[^a-z]/i, " ")
+								words.gsub!(/[^[[:alpha:]]]/i, " ")
 							end
 
 							# Add to the array
