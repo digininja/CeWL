@@ -672,10 +672,13 @@ url = ARGV.shift
 # Must have protocol
 url = "http://#{url}" if url !~ /^http(s)?:\/\//
 
+# Taking this back out again. Can't remember why it was put in but have found problems
+# with it in and none with it out so getting rid of it.
+#
 # The spider doesn't work properly if there isn't a / on the end
-if url !~ /\/$/
-	url = "#{url}/"
-end
+#if url !~ /\/$/
+#	url = "#{url}/"
+#end
 
 word_hash = {}
 email_arr = []
