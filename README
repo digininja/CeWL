@@ -241,6 +241,19 @@ Usage: cewl [OPTIONS] ... <url>
       
     <url>: The site to spider.
 
+Using Docker
+========
+
+Create container for CeWL
+```sh
+sudo docker build -t "greenmind/cewl:1" .
+```
+
+Using container
+```sh
+sudo docker run -it --rm "greenmind/cewl:1" -h
+```
+
 Ruby Doc
 ========
 CeWL is commented up in Ruby Doc format.
