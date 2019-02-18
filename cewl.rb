@@ -16,7 +16,7 @@
 # Licence:: CC-BY-SA 2.0 or GPL-3+
 #
 
-VERSION = "5.4.4.1 (Arkanoid)"
+VERSION = "5.4.5 (Exclusion)"
 
 puts "CeWL #{VERSION} Robin Wood (robin@digi.ninja) (https://digi.ninja/)\n"
 
@@ -468,6 +468,7 @@ opts = GetoptLong.new(
 		['--min_word_length', "-m", GetoptLong::REQUIRED_ARGUMENT],
 		['--no-words', "-n", GetoptLong::NO_ARGUMENT],
 		['--offsite', "-o", GetoptLong::NO_ARGUMENT],
+		['--exclude', GetoptLong::REQUIRED_ARGUMENT],
 		['--write', "-w", GetoptLong::REQUIRED_ARGUMENT],
 		['--ua', "-u", GetoptLong::REQUIRED_ARGUMENT],
 		['--meta-temp-dir', GetoptLong::REQUIRED_ARGUMENT],
@@ -499,6 +500,7 @@ def usage
 	-d <x>,--depth <x>: Depth to spider to, default 2.
 	-m, --min_word_length: Minimum word length, default 3.
 	-o, --offsite: Let the spider visit other sites.
+	--exclude: A file containing a list of paths to exclude
 	-w, --write: Write the output to the file.
 	-u, --ua <agent>: User agent to send.
 	-n, --no-words: Don't output the wordlist.
@@ -540,6 +542,7 @@ outfile = nil
 email_outfile = nil
 meta_outfile = nil
 offsite = false
+exclude_array = []
 depth = 2
 min_word_length = 3
 email = false
@@ -607,6 +610,13 @@ begin
 				usage if depth < 0
 			when '--offsite'
 				offsite = true
+			when '--exclude'
+				tmp_exclude_array = File.readlines(arg)
+				# Have to do this to strip the newline characters from the end
+				# of each element in the array
+				tmp_exclude_array.each do |line|
+					exclude_array << line.strip
+				end
 			when '--ua'
 				ua = arg
 			when '--debug'
@@ -648,7 +658,8 @@ begin
 				end
 		end
 	end
-rescue
+rescue => e
+	# puts e
 	usage
 end
 
@@ -761,6 +772,12 @@ catch :ctrl_c do
 							puts "Offsite link, not following: #{a_url}" if !allow && verbose
 						else
 							puts "Allowing offsite links" if @debug
+						end
+
+						puts "Found: #{a_url_parsed.path}" if @debug
+						if exclude_array.include?(a_url_parsed.path)
+							puts "Excluding path: #{a_url_parsed.path}" if verbose
+							allow = false
 						end
 					end
 				end
