@@ -615,7 +615,10 @@ begin
 				# Have to do this to strip the newline characters from the end
 				# of each element in the array
 				tmp_exclude_array.each do |line|
-					exclude_array << line.strip
+					exc = line.strip
+					if exc != "" 
+						exclude_array << line.strip
+					end
 				end
 			when '--ua'
 				ua = arg
