@@ -611,7 +611,12 @@ begin
 			when '--offsite'
 				offsite = true
 			when '--exclude'
-				tmp_exclude_array = File.readlines(arg)
+				begin
+					tmp_exclude_array = File.readlines(arg)
+				rescue => e
+					puts "\nUnable to open the excude file\n\n"
+					exit 1
+				end
 				# Have to do this to strip the newline characters from the end
 				# of each element in the array
 				tmp_exclude_array.each do |line|
