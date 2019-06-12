@@ -4,10 +4,10 @@ GEM
     mime (0.4.4)
     mime-types (3.2.2)
       mime-types-data (~> 3.2015)
-    mime-types-data (3.2018.0812)
+    mime-types-data (3.2019.0331)
     mini_exiftool (2.9.0)
     mini_portile2 (2.4.0)
-    nokogiri (1.10.1)
+    nokogiri (1.10.3)
       mini_portile2 (~> 2.4.0)
     spider (0.5.3)
     zip (2.0.2)
@@ -24,4 +24,4 @@ DEPENDENCIES
   zip
 
 BUNDLED WITH
-   2.0.1
+   1.17.2

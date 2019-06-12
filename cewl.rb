@@ -16,7 +16,7 @@
 # Licence:: CC-BY-SA 2.0 or GPL-3+
 #
 
-VERSION = "5.4.5 (Exclusion)"
+VERSION = "5.4.6 (Exclusion)"
 
 puts "CeWL #{VERSION} Robin Wood (robin@digi.ninja) (https://digi.ninja/)\n"
 
@@ -623,6 +623,7 @@ begin
 					exc = line.strip
 					if exc != "" 
 						exclude_array << line.strip
+						# puts "Excluding #{ line.strip}" 
 					end
 				end
 			when '--ua'
@@ -769,8 +770,8 @@ catch :ctrl_c do
 						end
 						allow = false
 					else
+						a_url_parsed = URI.parse(a_url)
 						if !offsite
-							a_url_parsed = URI.parse(a_url)
 							url_parsed = URI.parse(url)
 							puts "Comparing #{a_url} with #{url}" if debug
 
@@ -996,6 +997,7 @@ catch :ctrl_c do
 	rescue => e
 		puts "\nCouldn't access the site (#{url})\n"
 		puts "Error: #{e.inspect}"
+		puts "Error: #{e.backtrace}"
 		exit 2
 	end
 end
