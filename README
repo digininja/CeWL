@@ -224,21 +224,21 @@ Usage: cewl [OPTIONS] ... <url>
 	-c, --count: Show the count for each word found.
 	-v, --verbose: Verbose.
 	--debug: Extra debug information.
-      
+
 	Authentication
 	--auth_type: Digest or basic.
 	--auth_user: Authentication username.
 	--auth_pass: Authentication password.
-      
+
 	Proxy Support
 	--proxy_host: Proxy host.
 	--proxy_port: Proxy port, default 8080.
 	--proxy_username: Username for proxy, if required.
 	--proxy_password: Password for proxy, if required.
-      
+
 	Headers
 	--header, -H: In format name:value - can pass multiple.
-      
+
     <url>: The site to spider.
 
 Using Docker
@@ -253,6 +253,13 @@ Using container
 ```sh
 sudo docker run -it --rm "greenmind/cewl:1" -h
 ```
+
+Linking to container
+```sh
+sudo docker run -it --rm -v "${PWD}:/root" "greenmind/cewl:1" -h
+```
+> Exemple use: sudo docker run -it --rm -v "${PWD}:/root" "greenmind/cewl:1" http://businesscorp.com.br -w /root/saida.txt
+
 
 Ruby Doc
 ========
