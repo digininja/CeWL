@@ -3,7 +3,7 @@
 
 # == CeWL: Custom Word List Generator
 #
-# CeWL will spider a target site and generate up to three lists:
+# CeWL will spider a target site and generate up to group lists:
 #
 # * A word list of all unique words found on the target site
 # * A list of all email addresses found in mailto links
@@ -467,6 +467,7 @@ opts = GetoptLong.new(
 		['--depth', '-d', GetoptLong::REQUIRED_ARGUMENT],
 		['--min_word_length', "-m", GetoptLong::REQUIRED_ARGUMENT],
 		['--no-words', "-n", GetoptLong::NO_ARGUMENT],
+		['--groups', "-g", GetoptLong::REQUIRED_ARGUMENT],
 		['--offsite', "-o", GetoptLong::NO_ARGUMENT],
 		['--exclude', GetoptLong::REQUIRED_ARGUMENT],
 		['--write', "-w", GetoptLong::REQUIRED_ARGUMENT],
@@ -504,6 +505,7 @@ def usage
 	-w, --write: Write the output to the file.
 	-u, --ua <agent>: User agent to send.
 	-n, --no-words: Don't output the wordlist.
+	-g <x>, --groups <x>: Return groups of words as well
 	--with-numbers: Accept words with numbers in as well as just letters
 	-a, --meta: include meta data.
 	--meta_file file: Output file for meta data.
@@ -548,6 +550,7 @@ min_word_length = 3
 email = false
 meta = false
 wordlist = true
+groups = -1
 meta_temp_dir = "/tmp/"
 keep = false
 words_with_numbers = false
@@ -598,6 +601,8 @@ begin
 				meta_outfile = arg
 			when "--meta"
 				meta = true
+			when "--groups"
+				groups = arg.to_i
 			when "--email_file"
 				email_outfile = arg
 			when "--email"
@@ -700,6 +705,7 @@ url = "http://#{url}" if url !~ /^http(s)?:\/\//
 #	url = "#{url}/"
 #end
 
+group_word_hash = {}
 word_hash = {}
 email_arr = []
 url_stack = Tree.new
@@ -974,10 +980,22 @@ catch :ctrl_c do
 							end
 
 							# Add to the array
+							group_words = []
 							words.split(" ").each do |word|
 								if word.length >= min_word_length
 									word_hash[word] = 0 if !word_hash.has_key?(word)
 									word_hash[word] += 1
+								end
+								if (groups > 0)
+									group_words.push (word)
+									if (group_words.length() > groups)
+										group_words.shift()
+									end
+									if (group_words.length() == groups)
+										joined = group_words.join(" ")
+										group_word_hash[joined] = 0 if !group_word_hash.has_key?(joined)
+										group_word_hash[joined] += 1
+									end
 								end
 							end
 						end
@@ -1014,6 +1032,28 @@ if wordlist
 	end
 
 	sorted_wordlist = word_hash.sort_by do |word, count|
+		-count
+	end
+
+	sorted_wordlist.each do |word, count|
+		if show_count
+			outfile_file.puts "#{word}, #{count.to_s}"
+		else
+			outfile_file.puts word
+		end
+	end
+end
+
+if groups > 0
+	if verbose
+		if outfile.nil?
+			puts "Groups of words found\n"
+		else
+			puts "Writing groups of words to file\n"
+		end
+	end
+
+	sorted_wordlist = group_word_hash.sort_by do |word, count|
 		-count
 	end
 
