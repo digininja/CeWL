@@ -29,6 +29,7 @@ Change Log
 
 Version 5.4.4
 -------------
+Added the --lowercase parameter to convert all letters to lower case
 Added the --convert-umlauts parameter to convert Latin-1 umlauts (e.g. "ä" to "ae", "ö" to "oe", etc.)
 
 Version 5.4.3

@@ -474,6 +474,7 @@ opts = GetoptLong.new(
 		['--meta-temp-dir', GetoptLong::REQUIRED_ARGUMENT],
 		['--meta_file', GetoptLong::REQUIRED_ARGUMENT],
 		['--email_file', GetoptLong::REQUIRED_ARGUMENT],
+		['--lowercase', GetoptLong::NO_ARGUMENT],
 		['--with-numbers', GetoptLong::NO_ARGUMENT],
 		['--convert-umlauts', GetoptLong::NO_ARGUMENT],
 		['--meta', "-a", GetoptLong::NO_ARGUMENT],
@@ -505,6 +506,7 @@ def usage
 	-w, --write: Write the output to the file.
 	-u, --ua <agent>: User agent to send.
 	-n, --no-words: Don't output the wordlist.
+	--lowercase: Lowercase all parsed words
 	--with-numbers: Accept words with numbers in as well as just letters
 	--convert-umlauts: Convert common ISO-8859-1 (Latin-1) umlauts (ä-ae, ö-oe, ü-ue, ß-ss)
 	-a, --meta: include meta data.
@@ -552,6 +554,7 @@ meta = false
 wordlist = true
 meta_temp_dir = "/tmp/"
 keep = false
+lowercase = false
 words_with_numbers = false
 convert_umlauts = false
 show_count = false
@@ -576,6 +579,8 @@ begin
 		case opt
 			when '--help'
 				usage
+			when "--lowercase"
+				lowercase = true
 			when "--with-numbers"
 				words_with_numbers = true
 			when "--convert-umlauts"
@@ -971,7 +976,11 @@ catch :ctrl_c do
 						end
 
 						if wordlist
-							# Remove/convert any symbols
+							# Lowercase all parsed words
+							if lowercase then
+								words.downcase!
+							end
+							# Remove any symbols
 							if words_with_numbers then
 								words.gsub!(/[^[[:alnum:]]]/i, " ")
 							else
