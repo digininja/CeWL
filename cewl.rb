@@ -143,7 +143,7 @@ class MySpiderInstance<SpiderInstance
 	# Lifted from the original gem to fix the case statement
 	# which checked for Fixednum not Integer as
 	# Fixednum has been deprecated.
-	# 
+	#
 	def on(code, p = nil, &block)
 		f = p ? p : block
 		case code
@@ -244,7 +244,7 @@ class MySpiderInstance<SpiderInstance
 			end
 
 			res = http.request(req)
-			
+
 			if res.redirect?
 				puts "Redirect URL" if @debug
 				base_url = uri.to_s[0, uri.to_s.rindex('/')]
@@ -475,6 +475,7 @@ opts = GetoptLong.new(
 		['--meta_file', GetoptLong::REQUIRED_ARGUMENT],
 		['--email_file', GetoptLong::REQUIRED_ARGUMENT],
 		['--with-numbers', GetoptLong::NO_ARGUMENT],
+		['--convert-umlauts', GetoptLong::NO_ARGUMENT],
 		['--meta', "-a", GetoptLong::NO_ARGUMENT],
 		['--email', "-e", GetoptLong::NO_ARGUMENT],
 		['--count', '-c', GetoptLong::NO_ARGUMENT],
@@ -505,6 +506,7 @@ def usage
 	-u, --ua <agent>: User agent to send.
 	-n, --no-words: Don't output the wordlist.
 	--with-numbers: Accept words with numbers in as well as just letters
+	--convert-umlauts: Convert common ISO-8859-1 (Latin-1) umlauts (ä-ae, ö-oe, ü-ue, ß-ss)
 	-a, --meta: include meta data.
 	--meta_file file: Output file for meta data.
 	-e, --email: Include email addresses.
@@ -513,21 +515,21 @@ def usage
 	-c, --count: Show the count for each word found.
 	-v, --verbose: Verbose.
 	--debug: Extra debug information.
-      
+
 	Authentication
 	--auth_type: Digest or basic.
 	--auth_user: Authentication username.
 	--auth_pass: Authentication password.
-      
+
 	Proxy Support
 	--proxy_host: Proxy host.
 	--proxy_port: Proxy port, default 8080.
 	--proxy_username: Username for proxy, if required.
 	--proxy_password: Password for proxy, if required.
-      
+
 	Headers
 	--header, -H: In format name:value - can pass multiple.
-      
+
     <url>: The site to spider.
 
 "
@@ -551,6 +553,7 @@ wordlist = true
 meta_temp_dir = "/tmp/"
 keep = false
 words_with_numbers = false
+convert_umlauts = false
 show_count = false
 auth_type = nil
 auth_user = nil
@@ -575,6 +578,8 @@ begin
 				usage
 			when "--with-numbers"
 				words_with_numbers = true
+			when "--convert-umlauts"
+				convert_umlauts = true
 			when "--count"
 				show_count = true
 			when "--meta-temp-dir"
@@ -621,9 +626,9 @@ begin
 				# of each element in the array
 				tmp_exclude_array.each do |line|
 					exc = line.strip
-					if exc != "" 
+					if exc != ""
 						exclude_array << line.strip
-						# puts "Excluding #{ line.strip}" 
+						# puts "Excluding #{ line.strip}"
 					end
 				end
 			when '--ua'
@@ -966,11 +971,16 @@ catch :ctrl_c do
 						end
 
 						if wordlist
-							# Remove any symbols
+							# Remove/convert any symbols
 							if words_with_numbers then
 								words.gsub!(/[^[[:alnum:]]]/i, " ")
 							else
 								words.gsub!(/[^[[:alpha:]]]/i, " ")
+							end
+
+							if convert_umlauts then
+								words.gsub!(/[^a-zäöüßÄÖÜ]/i, " ")
+								words.gsub!(/[äöüßÄÖÜ]/, "ä" => "ae", "ö" => "oe", "ü" => "ue", "ß" => "ss", "Ä" => "Ae", "Ö" => "Oe", "Ü" => "Ue")
 							end
 
 							# Add to the array
