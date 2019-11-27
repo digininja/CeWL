@@ -143,7 +143,7 @@ class MySpiderInstance<SpiderInstance
 	# Lifted from the original gem to fix the case statement
 	# which checked for Fixednum not Integer as
 	# Fixednum has been deprecated.
-	# 
+	#
 	def on(code, p = nil, &block)
 		f = p ? p : block
 		case code
@@ -244,7 +244,7 @@ class MySpiderInstance<SpiderInstance
 			end
 
 			res = http.request(req)
-			
+
 			if res.redirect?
 				puts "Redirect URL" if @debug
 				base_url = uri.to_s[0, uri.to_s.rindex('/')]
@@ -474,6 +474,7 @@ opts = GetoptLong.new(
 		['--meta-temp-dir', GetoptLong::REQUIRED_ARGUMENT],
 		['--meta_file', GetoptLong::REQUIRED_ARGUMENT],
 		['--email_file', GetoptLong::REQUIRED_ARGUMENT],
+		['--lowercase', GetoptLong::NO_ARGUMENT],
 		['--with-numbers', GetoptLong::NO_ARGUMENT],
 		['--meta', "-a", GetoptLong::NO_ARGUMENT],
 		['--email', "-e", GetoptLong::NO_ARGUMENT],
@@ -504,6 +505,7 @@ def usage
 	-w, --write: Write the output to the file.
 	-u, --ua <agent>: User agent to send.
 	-n, --no-words: Don't output the wordlist.
+	--lowercase: Lowercase all parsed words
 	--with-numbers: Accept words with numbers in as well as just letters
 	-a, --meta: include meta data.
 	--meta_file file: Output file for meta data.
@@ -513,21 +515,21 @@ def usage
 	-c, --count: Show the count for each word found.
 	-v, --verbose: Verbose.
 	--debug: Extra debug information.
-      
+
 	Authentication
 	--auth_type: Digest or basic.
 	--auth_user: Authentication username.
 	--auth_pass: Authentication password.
-      
+
 	Proxy Support
 	--proxy_host: Proxy host.
 	--proxy_port: Proxy port, default 8080.
 	--proxy_username: Username for proxy, if required.
 	--proxy_password: Password for proxy, if required.
-      
+
 	Headers
 	--header, -H: In format name:value - can pass multiple.
-      
+
     <url>: The site to spider.
 
 "
@@ -550,6 +552,7 @@ meta = false
 wordlist = true
 meta_temp_dir = "/tmp/"
 keep = false
+lowercase = false
 words_with_numbers = false
 show_count = false
 auth_type = nil
@@ -573,6 +576,8 @@ begin
 		case opt
 			when '--help'
 				usage
+			when "--lowercase"
+				lowercase = true
 			when "--with-numbers"
 				words_with_numbers = true
 			when "--count"
@@ -621,9 +626,9 @@ begin
 				# of each element in the array
 				tmp_exclude_array.each do |line|
 					exc = line.strip
-					if exc != "" 
+					if exc != ""
 						exclude_array << line.strip
-						# puts "Excluding #{ line.strip}" 
+						# puts "Excluding #{ line.strip}"
 					end
 				end
 			when '--ua'
@@ -966,6 +971,10 @@ catch :ctrl_c do
 						end
 
 						if wordlist
+							# Lowercase all parsed words
+							if lowercase then
+								words.downcase!
+							end
 							# Remove any symbols
 							if words_with_numbers then
 								words.gsub!(/[^[[:alnum:]]]/i, " ")

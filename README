@@ -27,6 +27,10 @@ GitHub: https://github.com/digininja/CeWL
 Change Log
 ==========
 
+Version 5.4.4
+-------------
+Added the --lowercase parameter to convert all letters to lower case
+
 Version 5.4.3
 -------------
 Added the --with-number parameter to make words include letters and numbers
@@ -224,21 +228,21 @@ Usage: cewl [OPTIONS] ... <url>
 	-c, --count: Show the count for each word found.
 	-v, --verbose: Verbose.
 	--debug: Extra debug information.
-      
+
 	Authentication
 	--auth_type: Digest or basic.
 	--auth_user: Authentication username.
 	--auth_pass: Authentication password.
-      
+
 	Proxy Support
 	--proxy_host: Proxy host.
 	--proxy_port: Proxy port, default 8080.
 	--proxy_username: Username for proxy, if required.
 	--proxy_password: Password for proxy, if required.
-      
+
 	Headers
 	--header, -H: In format name:value - can pass multiple.
-      
+
     <url>: The site to spider.
 
 Ruby Doc
