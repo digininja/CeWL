@@ -476,6 +476,7 @@ opts = GetoptLong.new(
 		['--email_file', GetoptLong::REQUIRED_ARGUMENT],
 		['--lowercase', GetoptLong::NO_ARGUMENT],
 		['--with-numbers', GetoptLong::NO_ARGUMENT],
+		['--convert-umlauts', GetoptLong::NO_ARGUMENT],
 		['--meta', "-a", GetoptLong::NO_ARGUMENT],
 		['--email', "-e", GetoptLong::NO_ARGUMENT],
 		['--count', '-c', GetoptLong::NO_ARGUMENT],
@@ -507,6 +508,7 @@ def usage
 	-n, --no-words: Don't output the wordlist.
 	--lowercase: Lowercase all parsed words
 	--with-numbers: Accept words with numbers in as well as just letters
+	--convert-umlauts: Convert common ISO-8859-1 (Latin-1) umlauts (ä-ae, ö-oe, ü-ue, ß-ss)
 	-a, --meta: include meta data.
 	--meta_file file: Output file for meta data.
 	-e, --email: Include email addresses.
@@ -554,6 +556,7 @@ meta_temp_dir = "/tmp/"
 keep = false
 lowercase = false
 words_with_numbers = false
+convert_umlauts = false
 show_count = false
 auth_type = nil
 auth_user = nil
@@ -580,6 +583,8 @@ begin
 				lowercase = true
 			when "--with-numbers"
 				words_with_numbers = true
+			when "--convert-umlauts"
+				convert_umlauts = true
 			when "--count"
 				show_count = true
 			when "--meta-temp-dir"
@@ -980,6 +985,10 @@ catch :ctrl_c do
 								words.gsub!(/[^[[:alnum:]]]/i, " ")
 							else
 								words.gsub!(/[^[[:alpha:]]]/i, " ")
+							end
+
+							if convert_umlauts then
+								words.gsub!(/[äöüßÄÖÜ]/, "ä" => "ae", "ö" => "oe", "ü" => "ue", "ß" => "ss", "Ä" => "Ae", "Ö" => "Oe", "Ü" => "Ue")
 							end
 
 							# Add to the array
