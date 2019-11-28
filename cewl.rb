@@ -988,7 +988,6 @@ catch :ctrl_c do
 							end
 
 							if convert_umlauts then
-								words.gsub!(/[^a-zäöüßÄÖÜ]/i, " ")
 								words.gsub!(/[äöüßÄÖÜ]/, "ä" => "ae", "ö" => "oe", "ü" => "ue", "ß" => "ss", "Ä" => "Ae", "Ö" => "Oe", "Ü" => "Ue")
 							end
 
