@@ -1,7 +1,7 @@
 CeWL - Custom Word List generator
 =================================
 
-Copyright(c) 2018, Robin Wood <robin@digi.ninja>
+Copyright(c) 2019, Robin Wood <robin@digi.ninja>
 
 Based on a discussion on PaulDotCom (episode 129) about creating custom word lists
 spidering a targets website and collecting unique words I decided to write
@@ -27,7 +27,7 @@ GitHub: https://github.com/digininja/CeWL
 Change Log
 ==========
 
-Version 5.4.4
+Version 5.4.6
 -------------
 Added the --lowercase parameter to convert all letters to lower case
 Added the --convert-umlauts parameter to convert Latin-1 umlauts (e.g. "ä" to "ae", "ö" to "oe", etc.)
