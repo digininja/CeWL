@@ -16,7 +16,7 @@
 # Licence:: CC-BY-SA 2.0 or GPL-3+
 #
 
-VERSION = "5.4.6 (Exclusion)"
+VERSION = "5.4.7 (Exclusion)"
 
 puts "CeWL #{VERSION} Robin Wood (robin@digi.ninja) (https://digi.ninja/)\n"
 
