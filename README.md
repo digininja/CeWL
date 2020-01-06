@@ -1,92 +1,71 @@
-CeWL - Custom Word List generator
-=================================
+# CeWL - Custom Word List generator
 
 Copyright(c) 2019, Robin Wood <robin@digi.ninja>
 
-Based on a discussion on PaulDotCom (episode 129) about creating custom word lists
-spidering a targets website and collecting unique words I decided to write
-CeWL, the Custom Word List generator. CeWL is a ruby app which spiders a
-given URL to a specified depth, optionally following external links, and
-returns a list of words which can then be used for password crackers such
-as John the Ripper.
+Based on a discussion on PaulDotCom (episode 129) about creating custom word lists spidering a targets website and collecting unique words I decided to write
+CeWL, the Custom Word List generator. CeWL is a ruby app which spiders a given URL to a specified depth, optionally following external links, and
+returns a list of words which can then be used for password crackers such as John the Ripper.
 
-By default, CeWL sticks to just the site you have specified and will go to a
-depth of 2 links, this behaviour can be changed by passing arguments. Be
-careful if setting a large depth and allowing it to go offsite, you could end
-up drifting on to a lot of other domains. All words of three characters and
-over are output to stdout. This length can be increased and the words can be
-written to a file rather than screen so the app can be automated.
+By default, CeWL sticks to just the site you have specified and will go to a depth of 2 links, this behaviour can be changed by passing arguments. Be careful if setting a large depth and allowing it to go offsite, you could end up drifting on to a lot of other domains. All words of three characters and over are output to stdout. This length can be increased and the words can be written to a file rather than screen so the app can be automated.
 
-CeWL also has an associated command line app, FAB (Files Already Bagged)
-which uses the same meta data extraction techniques to create author/creator
+CeWL also has an associated command line app, FAB (Files Already Bagged) which uses the same meta data extraction techniques to create author/creator
 lists from already downloaded.
 
-Homepage: https://digi.ninja/projects/cewl.php
-GitHub: https://github.com/digininja/CeWL
+Homepage: <https://digi.ninja/projects/cewl.php>
+GitHub: <https://github.com/digininja/CeWL>
 
-Change Log
-==========
+## Change Log
 
-Version 5.4.7
--------------
+### Version 5.4.7
+
 Added the --allowed parameter to limit crawling to URLs matching the passed RegEx
 
-Version 5.4.6
--------------
+### Version 5.4.6
+
 Added the --lowercase parameter to convert all letters to lower case
 Added the --convert-umlauts parameter to convert Latin-1 umlauts (e.g. "ä" to "ae", "ö" to "oe", etc.)
 
-Version 5.4.3
--------------
+### Version 5.4.3
+
 Added the --with-number parameter to make words include letters and numbers
 
-Version 5.4.2
--------------
+### Version 5.4.2
+
 Merged an update to change the way usage instructions are shown.
 Updated instructions on installing gems.
 Updated README.
 
-Version 5.4.1
--------------
-A line to add a / to the end of the URL had been commented out. I don't
-remember why it was done but I'm putting it back in. See issue
-https://github.com/digininja/CeWL/issues/26
+### Version 5.4.1
 
-Version 5.4
------------
+A line to add a / to the end of the URL had been commented out. I don't remember why it was done but I'm putting it back in. See (issue 26) [https://github.com/digininja/CeWL/issues/26]
 
-Steven van der Baan added the ability to hit ctrl-c and keep the results
-so far.
+### Version 5.4
 
-Version 5.3.1
--------------
+* Steven van der Baan added the ability to hit ctrl-c and keep the results so far.
 
-Added the ability to handle non-standard port numbers.
-Added lots more debugging and a new --debug parameter.
+### Version 5.3.1
 
-Version 5.3
------------
+* Added the ability to handle non-standard port numbers.
+* Added lots more debugging and a new --debug parameter.
 
-Added the command line argument --header (-H) to allow headers to be passed in.
-Parameters are specified in name:value pairs and you can pass multiple.
+### Version 5.3
 
-Version 5.2
------------
+* Added the command line argument --header (-H) to allow headers to be passed in.
+* Parameters are specified in name:value pairs and you can pass multiple.
+
+### Version 5.2
 
 Loads of changes including:
 
 * Code refactoring by @g0tmi1k
 * Internationalisation - should now handle non-ASCII sites much better
-* Found more ways to pull words out of JavaScript content and other areas
-  that aren't normal HTML
+* Found more ways to pull words out of JavaScript content and other areas that aren't normal HTML
 * Lots of little bug fixes
 
-Version 5.1
------------
+### ersion 5.1
 
-Added the GPL-3+ licence to allow inclusion in Debian.
-
-Added a Gemfile to make installing gems easier.
+* Added the GPL-3+ licence to allow inclusion in Debian.
+* Added a Gemfile to make installing gems easier.
 
 Version 5.0
 -----------
