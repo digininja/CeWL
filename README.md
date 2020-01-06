@@ -9,22 +9,23 @@ By default, CeWL sticks to just the site you have specified and will go to a dep
 CeWL also has an associated command line app, FAB (Files Already Bagged) which uses the same meta data extraction techniques to create author/creator lists from already downloaded.
 
 Homepage: <https://digi.ninja/projects/cewl.php>
+
 GitHub: <https://github.com/digininja/CeWL>
 
 ## Change Log
 
 ### Version 5.4.7
 
-* Added the `--allowed parameter` to limit crawling to URLs matching the passed RegEx
+* Added the `--allowed parameter` to limit crawling to URLs matching the passed RegEx. Work done by [5p1n](https://github.com/5p1n/).
 
 ### Version 5.4.6
 
-* Added the `--lowercase` parameter to convert all letters to lower case
-* Added the `--convert-umlauts` parameter to convert Latin-1 umlauts (e.g. "ä" to "ae", "ö" to "oe", etc.)
+* Added the `--lowercase` parameter to convert all letters to lower case.
+* Added the `--convert-umlauts` parameter to convert Latin-1 umlauts (e.g. "ä" to "ae", "ö" to "oe", etc.).
 
 ### Version 5.4.3
 
-* Added the `--with-number` parameter to make words include letters and numbers
+* Added the `--with-number` parameter to make words include letters and numbers.
 
 ### Version 5.4.2
 
@@ -54,7 +55,7 @@ GitHub: <https://github.com/digininja/CeWL>
 
 Loads of changes including:
 
-* Code refactoring by @g0tmi1k
+* Code refactoring by [@g0tmi1k](https://github.com/g0tmi1k)
 * Internationalisation - should now handle non-ASCII sites much better
 * Found more ways to pull words out of JavaScript content and other areas that aren't normal HTML
 * Lots of little bug fixes
