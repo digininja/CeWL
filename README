@@ -27,6 +27,10 @@ GitHub: https://github.com/digininja/CeWL
 Change Log
 ==========
 
+Version 5.4.7
+-------------
+Added the --allowed parameter to limit crawling to URLs matching the passed RegEx
+
 Version 5.4.6
 -------------
 Added the --lowercase parameter to convert all letters to lower case
