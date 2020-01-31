@@ -16,7 +16,7 @@
 # Licence:: CC-BY-SA 2.0 or GPL-3+
 #
 
-VERSION = "5.4.6 (Exclusion)"
+VERSION = "5.4.8 (Inclusion)"
 
 puts "CeWL #{VERSION} Robin Wood (robin@digi.ninja) (https://digi.ninja/)\n"
 
@@ -469,6 +469,7 @@ opts = GetoptLong.new(
 		['--no-words', "-n", GetoptLong::NO_ARGUMENT],
 		['--offsite', "-o", GetoptLong::NO_ARGUMENT],
 		['--exclude', GetoptLong::REQUIRED_ARGUMENT],
+		['--allowed', GetoptLong::REQUIRED_ARGUMENT],
 		['--write', "-w", GetoptLong::REQUIRED_ARGUMENT],
 		['--ua', "-u", GetoptLong::REQUIRED_ARGUMENT],
 		['--meta-temp-dir', GetoptLong::REQUIRED_ARGUMENT],
@@ -503,6 +504,7 @@ def usage
 	-m, --min_word_length: Minimum word length, default 3.
 	-o, --offsite: Let the spider visit other sites.
 	--exclude: A file containing a list of paths to exclude
+	--allowed: A regex pattern that path must match to be followed
 	-w, --write: Write the output to the file.
 	-u, --ua <agent>: User agent to send.
 	-n, --no-words: Don't output the wordlist.
@@ -547,6 +549,7 @@ email_outfile = nil
 meta_outfile = nil
 offsite = false
 exclude_array = []
+allowed_pattern = nil
 depth = 2
 min_word_length = 3
 email = false
@@ -636,6 +639,8 @@ begin
 						# puts "Excluding #{ line.strip}"
 					end
 				end
+			when '--allowed'
+				allowed_pattern = Regexp.new(arg)
 			when '--ua'
 				ua = arg
 			when '--debug'
@@ -798,12 +803,21 @@ catch :ctrl_c do
 							puts "Excluding path: #{a_url_parsed.path}" if verbose
 							allow = false
 						end
+
+						if allowed_pattern && !a_url_parsed.path.match(allowed_pattern)
+							puts "Excluding path: #{a_url_parsed.path} based on allowed pattern" if verbose
+							allow = false
+						end
 					end
 				end
 				allow
 			end
 
-			s.on :success do |a_url, resp, prior_url|
+			# This was :success so only the content from a 200 was processed.
+			# Updating it to :every so that the content of all pages gets processed
+			# so you can grab things off 404s or text leaked on redirect and error pages.
+
+			s.on :every do |a_url, resp, prior_url|
 				if verbose
 					if prior_url.nil?
 						puts "Visiting: #{a_url}, got response code #{resp.code}"
