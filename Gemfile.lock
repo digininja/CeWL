@@ -7,7 +7,7 @@ GEM
     mime-types-data (3.2019.0331)
     mini_exiftool (2.9.0)
     mini_portile2 (2.4.0)
-    nokogiri (1.10.4)
+    nokogiri (1.10.8)
       mini_portile2 (~> 2.4.0)
     spider (0.5.3)
     zip (2.0.2)
