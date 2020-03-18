@@ -205,6 +205,24 @@ Usage: cewl [OPTIONS] ... <url>
     <url>: The site to spider.
 ```
 
+### Running CeWL in a Docker container
+
+To quickly use CeWL on your machine with Docker, you have to build it :
+1. Build the container :
+    ```sh
+    sudo docker build -t cewl .
+    ```
+2. Container usage without interacting with local files :
+    ```sh
+    sudo docker run -it --rm cewl [OPTIONS] ... <url>
+    ```
+3. Container usage with local files as input or output :
+    ```sh
+    # you have to mount the current directory when calling the container 
+    sudo docker run -it --rm -v "${PWD}:/root" cewl [OPTIONS] ... <url>
+    ```
+
+
 ## Licence
 
 This project released under the Creative Commons Attribution-Share Alike 2.0 UK: England & Wales
