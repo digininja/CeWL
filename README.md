@@ -219,7 +219,7 @@ To quickly use CeWL on your machine with Docker, you have to build it :
 3. Container usage with local files as input or output :
     ```sh
     # you have to mount the current directory when calling the container 
-    sudo docker run -it --rm -v "${PWD}:/root" cewl [OPTIONS] ... <url>
+    sudo docker run -it --rm -v "${PWD}:/home" cewl [OPTIONS] ... <url>
     ```
 
 
