@@ -8,6 +8,17 @@ By default, CeWL sticks to just the site you have specified and will go to a dep
 
 CeWL also has an associated command line app, FAB (Files Already Bagged) which uses the same meta data extraction techniques to create author/creator lists from already downloaded.
 
+For anyone running CeWL with Ruby 2.7, you might get some warnings in the style:
+
+```
+.../ruby-2.7.0/gems/mime-types-3.2.2/lib/mime/types/logger.rb:30: warning: `_1' is reserved for numbered parameter; consider another name
+```
+This is due to a new feature introduced in 2.7 which conflices with one line of code in the logger script from the mime-types gem. There is an update for it in the gem's repo so hopefully that will be released soon. Till then, as far as I can tell, the warning does not affect CeWL in any way. If, for asthetics, you want to hide the warning, you can run the script as follows:
+
+```
+ruby -W0 ./cewl.rb
+```
+
 Homepage: <https://digi.ninja/projects/cewl.php>
 
 GitHub: <https://github.com/digininja/CeWL>
