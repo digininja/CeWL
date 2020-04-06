@@ -13,5 +13,5 @@ RUN set -ex \
 
 COPY . /usr/src/CeWL
 
-WORKDIR /home
+WORKDIR /host
 ENTRYPOINT ["/usr/src/CeWL/cewl.rb"]
