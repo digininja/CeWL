@@ -210,16 +210,16 @@ Usage: cewl [OPTIONS] ... <url>
 To quickly use CeWL on your machine with Docker, you have to build it :
 1. Build the container :
     ```sh
-    sudo docker build -t cewl .
+    docker build -t cewl .
     ```
 2. Container usage without interacting with local files :
     ```sh
-    sudo docker run -it --rm cewl [OPTIONS] ... <url>
+    docker run -it --rm cewl [OPTIONS] ... <url>
     ```
 3. Container usage with local files as input or output :
     ```sh
     # you have to mount the current directory when calling the container 
-    sudo docker run -it --rm -v "${PWD}:/host" cewl [OPTIONS] ... <url>
+    docker run -it --rm -v "${PWD}:/host" cewl [OPTIONS] ... <url>
     ```
 
 
