@@ -25,6 +25,10 @@ GitHub: <https://github.com/digininja/CeWL>
 
 ## Change Log
 
+### Version 5.4.9
+
+* Added Docker support.
+
 ### Version 5.4.8
 
 * Updated the parser so that it looks at the content on all pages which are returned, not just those with a 200 return code.
@@ -233,6 +237,7 @@ To quickly use CeWL on your machine with Docker, you have to build it :
     docker run -it --rm -v "${PWD}:/host" cewl [OPTIONS] ... <url>
     ```
 
+I am going to stress here, I am not going to be offering any support for this. The work was done by [@loris-intergalactique](https://github.com/loris-intergalactique) who has offered to field any questions on it and give support. I don't use or know Docker, so please, don't ask me for help.
 
 ## Licence
 
