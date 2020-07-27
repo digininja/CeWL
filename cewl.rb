@@ -17,7 +17,7 @@
 # Licence:: CC-BY-SA 2.0 or GPL-3+
 #
 
-VERSION = "5.5.0 (Grouping)"
+VERSION = "5.5.1 (Pathing)"
 
 puts "CeWL #{VERSION} Robin Wood (robin@digi.ninja) (https://digi.ninja/)\n"
 
@@ -483,6 +483,7 @@ opts = GetoptLong.new(
 		['--meta', "-a", GetoptLong::NO_ARGUMENT],
 		['--email', "-e", GetoptLong::NO_ARGUMENT],
 		['--count', '-c', GetoptLong::NO_ARGUMENT],
+		['--paths', '-p', GetoptLong::NO_ARGUMENT],
 		['--auth_user', GetoptLong::REQUIRED_ARGUMENT],
 		['--auth_pass', GetoptLong::REQUIRED_ARGUMENT],
 		['--auth_type', GetoptLong::REQUIRED_ARGUMENT],
@@ -520,6 +521,7 @@ def usage
 	--email_file <file>: Output file for email addresses.
 	--meta-temp-dir <dir>: The temporary directory used by exiftool when parsing files, default /tmp.
 	-c, --count: Show the count for each word found.
+	-p, --paths: Capture all the URL paths seen during the spidering.
 	-v, --verbose: Verbose.
 	--debug: Extra debug information.
 
@@ -565,6 +567,8 @@ lowercase = false
 words_with_numbers = false
 convert_umlauts = false
 show_count = false
+log_paths = false
+paths = []
 auth_type = nil
 auth_user = nil
 auth_pass = nil
@@ -592,6 +596,8 @@ begin
 				words_with_numbers = true
 			when "--convert-umlauts"
 				convert_umlauts = true
+			when "--paths"
+				log_paths = true
 			when "--count"
 				show_count = true
 			when "--meta-temp-dir"
