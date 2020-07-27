@@ -29,7 +29,7 @@
 
 require "rubygems"
 require 'getoptlong'
-require "./cewl_lib.rb"
+require_relative "./cewl_lib.rb"
 
 opts = GetoptLong.new(
 	[ '--help', '-h', GetoptLong::NO_ARGUMENT ],
