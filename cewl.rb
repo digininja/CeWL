@@ -3,11 +3,12 @@
 
 # == CeWL: Custom Word List Generator
 #
-# CeWL will spider a target site and generate up to group lists:
+# CeWL will spider a target site and generate the following lists:
 #
 # * A word list of all unique words found on the target site
 # * A list of all email addresses found in mailto links
 # * A list of usernames/author details from meta data found in any documents on the site
+# * Groups of words up to the specified group size
 #
 # URL: The site to spider.
 #
@@ -16,7 +17,7 @@
 # Licence:: CC-BY-SA 2.0 or GPL-3+
 #
 
-VERSION = "5.4.6 (Exclusion)"
+VERSION = "5.5.0 (Grouping)"
 
 puts "CeWL #{VERSION} Robin Wood (robin@digi.ninja) (https://digi.ninja/)\n"
 
@@ -143,7 +144,7 @@ class MySpiderInstance<SpiderInstance
 	# Lifted from the original gem to fix the case statement
 	# which checked for Fixednum not Integer as
 	# Fixednum has been deprecated.
-	# 
+	#
 	def on(code, p = nil, &block)
 		f = p ? p : block
 		case code
@@ -244,7 +245,7 @@ class MySpiderInstance<SpiderInstance
 			end
 
 			res = http.request(req)
-			
+
 			if res.redirect?
 				puts "Redirect URL" if @debug
 				base_url = uri.to_s[0, uri.to_s.rindex('/')]
@@ -470,12 +471,15 @@ opts = GetoptLong.new(
 		['--groups', "-g", GetoptLong::REQUIRED_ARGUMENT],
 		['--offsite', "-o", GetoptLong::NO_ARGUMENT],
 		['--exclude', GetoptLong::REQUIRED_ARGUMENT],
+		['--allowed', GetoptLong::REQUIRED_ARGUMENT],
 		['--write', "-w", GetoptLong::REQUIRED_ARGUMENT],
 		['--ua', "-u", GetoptLong::REQUIRED_ARGUMENT],
 		['--meta-temp-dir', GetoptLong::REQUIRED_ARGUMENT],
 		['--meta_file', GetoptLong::REQUIRED_ARGUMENT],
 		['--email_file', GetoptLong::REQUIRED_ARGUMENT],
+		['--lowercase', GetoptLong::NO_ARGUMENT],
 		['--with-numbers', GetoptLong::NO_ARGUMENT],
+		['--convert-umlauts', GetoptLong::NO_ARGUMENT],
 		['--meta', "-a", GetoptLong::NO_ARGUMENT],
 		['--email', "-e", GetoptLong::NO_ARGUMENT],
 		['--count', '-c', GetoptLong::NO_ARGUMENT],
@@ -502,11 +506,14 @@ def usage
 	-m, --min_word_length: Minimum word length, default 3.
 	-o, --offsite: Let the spider visit other sites.
 	--exclude: A file containing a list of paths to exclude
+	--allowed: A regex pattern that path must match to be followed
 	-w, --write: Write the output to the file.
 	-u, --ua <agent>: User agent to send.
 	-n, --no-words: Don't output the wordlist.
 	-g <x>, --groups <x>: Return groups of words as well
+	--lowercase: Lowercase all parsed words
 	--with-numbers: Accept words with numbers in as well as just letters
+	--convert-umlauts: Convert common ISO-8859-1 (Latin-1) umlauts (ä-ae, ö-oe, ü-ue, ß-ss)
 	-a, --meta: include meta data.
 	--meta_file file: Output file for meta data.
 	-e, --email: Include email addresses.
@@ -515,21 +522,21 @@ def usage
 	-c, --count: Show the count for each word found.
 	-v, --verbose: Verbose.
 	--debug: Extra debug information.
-      
+
 	Authentication
 	--auth_type: Digest or basic.
 	--auth_user: Authentication username.
 	--auth_pass: Authentication password.
-      
+
 	Proxy Support
 	--proxy_host: Proxy host.
 	--proxy_port: Proxy port, default 8080.
 	--proxy_username: Username for proxy, if required.
 	--proxy_password: Password for proxy, if required.
-      
+
 	Headers
 	--header, -H: In format name:value - can pass multiple.
-      
+
     <url>: The site to spider.
 
 "
@@ -545,6 +552,7 @@ email_outfile = nil
 meta_outfile = nil
 offsite = false
 exclude_array = []
+allowed_pattern = nil
 depth = 2
 min_word_length = 3
 email = false
@@ -553,7 +561,9 @@ wordlist = true
 groups = -1
 meta_temp_dir = "/tmp/"
 keep = false
+lowercase = false
 words_with_numbers = false
+convert_umlauts = false
 show_count = false
 auth_type = nil
 auth_user = nil
@@ -576,8 +586,12 @@ begin
 		case opt
 			when '--help'
 				usage
+			when "--lowercase"
+				lowercase = true
 			when "--with-numbers"
 				words_with_numbers = true
+			when "--convert-umlauts"
+				convert_umlauts = true
 			when "--count"
 				show_count = true
 			when "--meta-temp-dir"
@@ -626,11 +640,13 @@ begin
 				# of each element in the array
 				tmp_exclude_array.each do |line|
 					exc = line.strip
-					if exc != "" 
+					if exc != ""
 						exclude_array << line.strip
-						# puts "Excluding #{ line.strip}" 
+						# puts "Excluding #{ line.strip}"
 					end
 				end
+			when '--allowed'
+				allowed_pattern = Regexp.new(arg)
 			when '--ua'
 				ua = arg
 			when '--debug'
@@ -794,12 +810,21 @@ catch :ctrl_c do
 							puts "Excluding path: #{a_url_parsed.path}" if verbose
 							allow = false
 						end
+
+						if allowed_pattern && !a_url_parsed.path.match(allowed_pattern)
+							puts "Excluding path: #{a_url_parsed.path} based on allowed pattern" if verbose
+							allow = false
+						end
 					end
 				end
 				allow
 			end
 
-			s.on :success do |a_url, resp, prior_url|
+			# This was :success so only the content from a 200 was processed.
+			# Updating it to :every so that the content of all pages gets processed
+			# so you can grab things off 404s or text leaked on redirect and error pages.
+
+			s.on :every do |a_url, resp, prior_url|
 				if verbose
 					if prior_url.nil?
 						puts "Visiting: #{a_url}, got response code #{resp.code}"
@@ -972,11 +997,19 @@ catch :ctrl_c do
 						end
 
 						if wordlist
+							# Lowercase all parsed words
+							if lowercase then
+								words.downcase!
+							end
 							# Remove any symbols
 							if words_with_numbers then
 								words.gsub!(/[^[[:alnum:]]]/i, " ")
 							else
 								words.gsub!(/[^[[:alpha:]]]/i, " ")
+							end
+
+							if convert_umlauts then
+								words.gsub!(/[äöüßÄÖÜ]/, "ä" => "ae", "ö" => "oe", "ü" => "ue", "ß" => "ss", "Ä" => "Ae", "Ö" => "Oe", "Ü" => "Ue")
 							end
 
 							# Add to the array
