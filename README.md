@@ -25,6 +25,10 @@ GitHub: <https://github.com/digininja/CeWL>
 
 ## Change Log
 
+### Version 5.5.0
+
+* Grouping words together.
+
 ### Version 5.4.9
 
 * Added Docker support.
