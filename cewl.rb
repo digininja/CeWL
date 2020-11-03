@@ -244,6 +244,7 @@ class MySpiderInstance<SpiderInstance
 				end
 			end
 
+            # failing request
 			res = http.request(req)
 
 			if res.redirect?
@@ -261,7 +262,9 @@ class MySpiderInstance<SpiderInstance
 				block.call(res)
 			end
 		rescue Zlib::DataError => e
-			puts "Error in Zlib decompressing data on #{uri}, moving on regardless"
+			puts "Error in Zlib decompressing data on #{uri}, trying to move on regardless."
+            puts "If this fails, try again adding the parameter --header 'Accept-Encoding: '"
+
 		rescue SocketError, Errno::EHOSTUNREACH => e
 			puts "Couldn't hit the site #{uri}, moving on"
 		rescue NoMethodError => e
