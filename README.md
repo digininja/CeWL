@@ -168,8 +168,10 @@ Seeing as I was asked, CeWL is pronounced "cool".
 
 CeWL needs the rubygems package to be installed along with the following gems:
 
+* mime
 * mime-types
 * mini_exiftool
+* nokogiri
 * rubyzip
 * spider
 
@@ -184,7 +186,7 @@ have encountered while running CeWL - https://digi.ninja/projects/cewl.php
 ## Usage
 
 ```
-./cew.rb
+./cewl.rb
 
 CeWL 5.4.2 (Break Out) Robin Wood (robin@digi.ninja) (https://digi.ninja/)
 Usage: cewl [OPTIONS] ... <url>
