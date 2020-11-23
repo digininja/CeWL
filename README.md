@@ -186,7 +186,7 @@ have encountered while running CeWL - https://digi.ninja/projects/cewl.php
 ## Usage
 
 ```
-./cew.rb
+./cewl.rb
 
 CeWL 5.4.2 (Break Out) Robin Wood (robin@digi.ninja) (https://digi.ninja/)
 Usage: cewl [OPTIONS] ... <url>
