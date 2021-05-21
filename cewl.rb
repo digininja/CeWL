@@ -965,16 +965,16 @@ catch :ctrl_c do
 					body += " #{attribute_text}"
 
 					# Strip html tags
-                    #
-                    # Replace them by a single space so not to accidentally concatenate
-                    # words when you get things like Hello<br />World. You want
-                    #
-                    # Hello World
-                    #
-                    # Not
-                    #
-                    # HelloWorld
-                    #
+					#
+					# Replace them by a single space so not to accidentally concatenate
+					# words when you get things like Hello<br />World. You want
+					#
+					# Hello World
+					#
+					# Not
+					#
+					# HelloWorld
+					#
 					words = body.gsub(/<\/?[^>]*>/, " ")
 
 					# Check if this is needed
