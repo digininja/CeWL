@@ -25,6 +25,9 @@ GitHub: <https://github.com/digininja/CeWL>
 
 ## Change Log
 
+### Version 5.5.1
+* Fixed accidental concatenation of words when stripping HTML tags.
+
 ### Version 5.5.0
 
 * Grouping words together.
