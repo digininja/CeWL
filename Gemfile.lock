@@ -2,12 +2,12 @@ GEM
   remote: https://rubygems.org/
   specs:
     mime (0.4.4)
-    mime-types (3.2.2)
+    mime-types (3.3.1)
       mime-types-data (~> 3.2015)
-    mime-types-data (3.2019.0331)
+    mime-types-data (3.2021.0225)
     mini_exiftool (2.9.0)
-    mini_portile2 (2.5.1)
-    nokogiri (1.11.4)
+    mini_portile2 (2.5.0)
+    nokogiri (1.11.0)
       mini_portile2 (~> 2.5.0)
       racc (~> 1.4)
     racc (1.5.2)
@@ -19,11 +19,11 @@ PLATFORMS
 
 DEPENDENCIES
   mime
-  mime-types
+  mime-types (>= 3.3.1)
   mini_exiftool
   nokogiri
   spider
   zip
 
 BUNDLED WITH
-   1.17.2
+   2.2.11
