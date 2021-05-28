@@ -166,19 +166,35 @@ Seeing as I was asked, CeWL is pronounced "cool".
 
 ## Installation
 
-CeWL needs the rubygems package to be installed along with the following gems:
+CeWL needs the following gems to be installed:
 
 * mime
 * mime-types
 * mini_exiftool
 * nokogiri
-* rubyzip
 * spider
+* zip
 
-All these gems were available by running "gem install xxx" as root. The
-mini_exiftool gem also requires the exiftool application to be installed.
+The easiest way to install these gems is with Bundler:
 
-Then just save CeWL to a directory and make it executable.
+```
+gem install bundler
+bundle install
+```
+
+Alternatively, you can install them manually with:
+
+```
+gem install xxx
+```
+
+The gem `mini_exiftool` gem also requires the exiftool application to be installed.
+
+Assuming you cloned the GitHub repo, the script should by executable by default, but if not, you can make it executable with:
+
+```
+chmod u+x ./cewl.rb
+```
 
 The project page on my site gives some tips on solving common problems people
 have encountered while running CeWL - https://digi.ninja/projects/cewl.php
