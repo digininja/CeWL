@@ -5,25 +5,23 @@ GEM
     mime-types (3.3.1)
       mime-types-data (~> 3.2015)
     mime-types-data (3.2021.0225)
-    mini_exiftool (2.9.0)
-    mini_portile2 (2.5.1)
-    nokogiri (1.11.4)
-      mini_portile2 (~> 2.5.0)
+    mini_exiftool (2.10.1)
+    nokogiri (1.11.7-x86_64-linux)
       racc (~> 1.4)
     racc (1.5.2)
-    spider (0.5.3)
-    zip (2.0.2)
+    rubyzip (2.3.0)
+    spider (0.5.4)
 
 PLATFORMS
-  ruby
+  x86_64-linux
 
 DEPENDENCIES
   mime
   mime-types (>= 3.3.1)
   mini_exiftool
   nokogiri
+  rubyzip
   spider
-  zip
 
 BUNDLED WITH
-   2.2.11
+   2.2.19

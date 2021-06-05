@@ -41,8 +41,8 @@ end
 #
 # This library contains functions to evaulate files found while running CeWL
 #
-# Author:: Robin Wood (dninja@gmail.com)
-# Copyright:: Copyright (c) Robin Wood 2016
+# Author:: Robin Wood (robin@digi.ninja)
+# Copyright:: Copyright (c) Robin Wood 2021
 # Licence:: GPL
 #
 
@@ -143,7 +143,7 @@ def get_docx_data(docx_file, verbose)
 	interesting_files=Array.[]("docProps/core.xml")
 
 	begin
-		Zip::ZipFile.open(docx_file) { |zipfile|
+		Zip::File.open(docx_file) { |zipfile|
 			interesting_files.each { |file|
 				if zipfile.find_entry(file)
 					xml=zipfile.read(file)

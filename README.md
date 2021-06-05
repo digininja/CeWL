@@ -175,8 +175,8 @@ CeWL needs the following gems to be installed:
 * mime-types
 * mini_exiftool
 * nokogiri
+* rubyzip
 * spider
-* zip
 
 The easiest way to install these gems is with Bundler:
 

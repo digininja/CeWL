@@ -22,12 +22,11 @@
 #
 # filename/list: the file or list of files to check
 #
-# Author:: Robin Wood (robin@digininja.org)
-# Copyright:: Copyright (c) Robin Wood 2016
+# Author:: Robin Wood (robin@digi.ninja)
+# Copyright:: Copyright (c) Robin Wood 2021
 # Licence:: GPL
 #
 
-require "rubygems"
 require 'getoptlong'
 require_relative "./cewl_lib.rb"
 
