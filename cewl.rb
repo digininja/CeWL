@@ -468,7 +468,7 @@ opts = GetoptLong.new(
 		['--depth', '-d', GetoptLong::REQUIRED_ARGUMENT],
 		['--min_word_length', "-m", GetoptLong::REQUIRED_ARGUMENT],
 		['--no-words', "-n", GetoptLong::NO_ARGUMENT],
-		['--groups', "-g", GetoptLong::REQUIRED_ARGUMENT],
+		['--groups', "-g", GetoptLong::OPTIONAL_ARGUMENT],
 		['--groupseparators', GetoptLong::REQUIRED_ARGUMENT],
 		['--offsite', "-o", GetoptLong::NO_ARGUMENT],
 		['--exclude', GetoptLong::REQUIRED_ARGUMENT],
@@ -511,7 +511,8 @@ def usage
 	-w, --write: Write the output to the file.
 	-u, --ua <agent>: User agent to send.
 	-n, --no-words: Don't output the wordlist.
-	-g <x>, --groups <x>: Return groups of words as well
+	-g <x>, --groups <x>: Return groups of words as well.
+				Specify multiple lengths with comma separator, e.g. 2,3. Default 2
 	--groupseparators <list of separators>: A list of separators for groups, default <space>
 	--lowercase: Lowercase all parsed words
 	--with-numbers: Accept words with numbers in as well as just letters
@@ -560,7 +561,7 @@ min_word_length = 3
 email = false
 meta = false
 wordlist = true
-groups = -1
+grouplengths = []
 groupseparators = [" "]
 meta_temp_dir = "/tmp/"
 keep = false
@@ -583,6 +584,12 @@ headers = []
 
 strip_css = true
 strip_js = true
+
+class String
+	def valid_int?
+		true if Integer self rescue false
+	end
+end
 
 begin
 	opts.each do |opt, arg|
@@ -619,7 +626,18 @@ begin
 			when "--meta"
 				meta = true
 			when "--groups"
-				groups = arg.to_i
+				if arg.length() == 0 then
+					grouplengths << 2
+				else
+					groups = arg.split(",")
+					groups.each do |length|
+						if length.valid_int? then
+							if length.to_i > 0 then
+								grouplengths << length.to_i
+							end
+						end
+					end
+				end
 			when "--groupseparators"
 				groupseparators = arg.split("")		
 			when "--email_file"
@@ -1024,16 +1042,37 @@ catch :ctrl_c do
 									word_hash[word] = 0 if !word_hash.has_key?(word)
 									word_hash[word] += 1
 								end
-								if (groups > 0)
-									group_words.push (word)
-									if (group_words.length() > groups)
-										group_words.shift()
-									end
-									if (group_words.length() == groups)
-										groupseparators.each do |separator|
-											joined = group_words.join(separator)
-											group_word_hash[joined] = 0 if !group_word_hash.has_key?(joined)
-											group_word_hash[joined] += 1
+
+								if grouplengths.length() > 0 then
+									grouplengths.each do |length|
+										# Push the new word on to the end of the array
+										# and then shift the first word off once the 
+										# array gets longer than it is allowed to be.
+										#
+										# this is a sentence
+										#
+										# becomes
+										#
+										# push "this" [this]
+										# push "is" [this is]
+										# push "a" [this is a] -> too long, shift "this" [is a]
+										# push "sentence" [is a sentence] -> too long, shift "is" [a sentence]
+										#
+										if group_words[length].nil? then
+											group_words[length] = []
+										end
+
+										group_words[length].push (word)
+
+										if (group_words[length].length() > length)
+											group_words[length].shift()
+										end
+										if (group_words[length].length() == length)
+											groupseparators.each do |separator|
+												joined = group_words[length].join(separator)
+												group_word_hash[joined] = 0 if !group_word_hash.has_key?(joined)
+												group_word_hash[joined] += 1
+											end
 										end
 									end
 								end
@@ -1084,7 +1123,7 @@ if wordlist
 	end
 end
 
-if groups > 0
+if grouplengths.length() > 0
 	if verbose
 		if outfile.nil?
 			puts "Groups of words found\n"
