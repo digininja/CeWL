@@ -469,6 +469,7 @@ opts = GetoptLong.new(
 		['--min_word_length', "-m", GetoptLong::REQUIRED_ARGUMENT],
 		['--no-words', "-n", GetoptLong::NO_ARGUMENT],
 		['--groups', "-g", GetoptLong::REQUIRED_ARGUMENT],
+		['--groupseparators', GetoptLong::REQUIRED_ARGUMENT],
 		['--offsite', "-o", GetoptLong::NO_ARGUMENT],
 		['--exclude', GetoptLong::REQUIRED_ARGUMENT],
 		['--allowed', GetoptLong::REQUIRED_ARGUMENT],
@@ -511,6 +512,7 @@ def usage
 	-u, --ua <agent>: User agent to send.
 	-n, --no-words: Don't output the wordlist.
 	-g <x>, --groups <x>: Return groups of words as well
+	--groupseparators <list of separators>: A list of separators for groups, default <space>
 	--lowercase: Lowercase all parsed words
 	--with-numbers: Accept words with numbers in as well as just letters
 	--convert-umlauts: Convert common ISO-8859-1 (Latin-1) umlauts (ä-ae, ö-oe, ü-ue, ß-ss)
@@ -559,6 +561,7 @@ email = false
 meta = false
 wordlist = true
 groups = -1
+groupseparators = [" "]
 meta_temp_dir = "/tmp/"
 keep = false
 lowercase = false
@@ -617,6 +620,8 @@ begin
 				meta = true
 			when "--groups"
 				groups = arg.to_i
+			when "--groupseparators"
+				groupseparators = arg.split("")		
 			when "--email_file"
 				email_outfile = arg
 			when "--email"
@@ -1025,9 +1030,11 @@ catch :ctrl_c do
 										group_words.shift()
 									end
 									if (group_words.length() == groups)
-										joined = group_words.join(" ")
-										group_word_hash[joined] = 0 if !group_word_hash.has_key?(joined)
-										group_word_hash[joined] += 1
+										groupseparators.each do |separator|
+											joined = group_words.join(separator)
+											group_word_hash[joined] = 0 if !group_word_hash.has_key?(joined)
+											group_word_hash[joined] += 1
+										end
 									end
 								end
 							end
