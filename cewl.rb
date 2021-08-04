@@ -42,6 +42,22 @@ end
 
 require_relative 'cewl_lib'
 
+# A simple way to check if a string is a valid integer
+# 
+# Usage:
+#
+# str = "123"
+# if str.valid_int? then
+#   int = str.to_i
+# end
+#
+class String
+	def valid_int?
+		true if Integer self rescue false
+	end
+end
+
+
 # Doing this so I can override the allowed? function which normally checks
 # the robots.txt file
 class MySpider<Spider
@@ -584,12 +600,6 @@ headers = []
 
 strip_css = true
 strip_js = true
-
-class String
-	def valid_int?
-		true if Integer self rescue false
-	end
-end
 
 begin
 	opts.each do |opt, arg|
