@@ -50,6 +50,7 @@ opts = GetoptLong.new(
 		['--no-words', "-n", GetoptLong::NO_ARGUMENT],
 		['--groups', "-g", GetoptLong::OPTIONAL_ARGUMENT],
 		['--groupseparators', GetoptLong::REQUIRED_ARGUMENT],
+		['--keep-original', GetoptLong::NO_ARGUMENT],
 		['--offsite', "-o", GetoptLong::NO_ARGUMENT],
 		['--exclude', GetoptLong::REQUIRED_ARGUMENT],
 		['--allowed', GetoptLong::REQUIRED_ARGUMENT],
@@ -96,6 +97,7 @@ def usage
 	--groupseparators <list of separators>: A list of separators for groups, default <space>
 	--lowercase: Lowercase all parsed words
 	--with-numbers: Accept words with numbers in as well as just letters
+	--keep-original: Do not strip any punctuation or numers, just split words on spaces
 	--convert-umlauts: Convert common ISO-8859-1 (Latin-1) umlauts (ä-ae, ö-oe, ü-ue, ß-ss)
 	-a, --meta: include meta data.
 	--meta_file file: Output file for meta data.
@@ -147,6 +149,7 @@ meta_temp_dir = "/tmp/"
 keep = false
 lowercase = false
 words_with_numbers = false
+keep_original = false
 convert_umlauts = false
 show_count = false
 auth_type = nil
@@ -176,6 +179,8 @@ begin
 				words_with_numbers = true
 			when "--convert-umlauts"
 				convert_umlauts = true
+            when "--keep-original"
+                keep_original = true
 			when "--count"
 				show_count = true
 			when "--meta-temp-dir"
@@ -598,12 +603,15 @@ catch :ctrl_c do
 							if lowercase then
 								words.downcase!
 							end
-							# Remove any symbols
-							if words_with_numbers then
-								words.gsub!(/[^[[:alnum:]]]/i, " ")
-							else
-								words.gsub!(/[^[[:alpha:]]]/i, " ")
-							end
+
+                            if not keep_original then
+                              # Remove any symbols
+                              if words_with_numbers then
+                                  words.gsub!(/[^[[:alnum:]]]/i, " ")
+                              else
+                                  words.gsub!(/[^[[:alpha:]]]/i, " ")
+                              end
+                            end
 
 							if convert_umlauts then
 								words.gsub!(/[äöüßÄÖÜ]/, "ä" => "ae", "ö" => "oe", "ü" => "ue", "ß" => "ss", "Ä" => "Ae", "Ö" => "Oe", "Ü" => "Ue")
