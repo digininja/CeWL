@@ -1,5 +1,10 @@
 # Change Log
 
+## Version 5.5.2
+
+* Can now specify a range for the number of words to group together when grouping.
+* Specify multiple grouping characters.
+
 ## Version 5.5.1
 * Fixed accidental concatenation of words when stripping HTML tags.
 
