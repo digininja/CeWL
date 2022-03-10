@@ -470,6 +470,7 @@ opts = GetoptLong.new(
 		['--no-words', "-n", GetoptLong::NO_ARGUMENT],
 		['--groups', "-g", GetoptLong::REQUIRED_ARGUMENT],
 		['--offsite', "-o", GetoptLong::NO_ARGUMENT],
+		['--subdomains', "-s", GetoptLong::NO_ARGUMENT],
 		['--exclude', GetoptLong::REQUIRED_ARGUMENT],
 		['--allowed', GetoptLong::REQUIRED_ARGUMENT],
 		['--write', "-w", GetoptLong::REQUIRED_ARGUMENT],
@@ -505,6 +506,9 @@ def usage
 	-d <x>,--depth <x>: Depth to spider to, default 2.
 	-m, --min_word_length: Minimum word length, default 3.
 	-o, --offsite: Let the spider visit other sites.
+	-s, --subdomains: Allow subdomains.
+            Note, site.com is not a subdomain of www.site.com
+            but www.site.com is a subdomain of site.com
 	--exclude: A file containing a list of paths to exclude
 	--allowed: A regex pattern that path must match to be followed
 	-w, --write: Write the output to the file.
@@ -551,6 +555,7 @@ outfile = nil
 email_outfile = nil
 meta_outfile = nil
 offsite = false
+subdomains_allowed = false
 exclude_array = []
 allowed_pattern = nil
 depth = 2
@@ -627,6 +632,8 @@ begin
 			when '--depth'
 				depth = arg.to_i
 				usage if depth < 0
+			when '--subdomains'
+				subdomains_allowed = true
 			when '--offsite'
 				offsite = true
 			when '--exclude'
@@ -779,8 +786,6 @@ catch :ctrl_c do
 			s.add_url_check do |a_url|
 				puts "Checking page #{a_url}" if debug
 				allow = true
-
-                subdomains_allowed = true
 
 				# Extensions to ignore
 				if a_url =~ /(\.zip$|\.gz$|\.zip$|\.bz2$|\.png$|\.gif$|\.jpg$|^#)/
