@@ -780,6 +780,8 @@ catch :ctrl_c do
 				puts "Checking page #{a_url}" if debug
 				allow = true
 
+                subdomains_allowed = true
+
 				# Extensions to ignore
 				if a_url =~ /(\.zip$|\.gz$|\.zip$|\.bz2$|\.png$|\.gif$|\.jpg$|^#)/
 					puts "Ignoring internal link or graphic: #{a_url}" if verbose
@@ -792,20 +794,32 @@ catch :ctrl_c do
 						end
 						allow = false
 					else
+                        # a_url is the one just pulled from the content
 						a_url_parsed = URI.parse(a_url)
-						if !offsite
-							url_parsed = URI.parse(url)
-							puts "Comparing #{a_url} with #{url}" if debug
 
-							# Make sure the host, port and scheme matches (else its offsite)
-							allow = (a_url_parsed.host == url_parsed.host) && (a_url_parsed.port == url_parsed.port) && (a_url_parsed.scheme == url_parsed.scheme) ? true : false
+                        # url is the one that was specified by the user
+                        url_parsed = URI.parse(url)
 
-							puts "Offsite link, not following: #{a_url}" if !allow && verbose
-						else
-							puts "Allowing offsite links" if @debug
-						end
+                        if subdomains_allowed
+							puts "Comparing #{a_url_parsed.host} with #{url_parsed.host} for subdomain allowed" if debug
+                            if a_url_parsed.host =~ /#{url_parsed.host}$/i
+                              puts "Subdomain found, allowing it" if debug
+                              allow = true
+                            end
+                        else
+                          if !offsite
+                              puts "Comparing #{a_url} with #{url} for exact match" if debug
 
-						puts "Found: #{a_url_parsed.path}" if @debug
+                              # Make sure the host, port and scheme matches (else its offsite)
+                              allow = (a_url_parsed.host == url_parsed.host) && (a_url_parsed.port == url_parsed.port) && (a_url_parsed.scheme == url_parsed.scheme) ? true : false
+
+                              puts "Offsite link, not following: #{a_url}" if !allow && verbose
+                          else
+                              puts "Allowing offsite links" if debug
+                          end
+                        end
+
+						puts "Found: #{a_url_parsed.path}" if debug
 						if exclude_array.include?(a_url_parsed.path)
 							puts "Excluding path: #{a_url_parsed.path}" if verbose
 							allow = false
