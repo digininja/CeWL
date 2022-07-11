@@ -806,8 +806,9 @@ catch :ctrl_c do
 						end
 
 						puts "Found: #{a_url_parsed.path}" if @debug
-						if exclude_array.include?(a_url_parsed.path)
-							puts "Excluding path: #{a_url_parsed.path}" if verbose
+
+						if exclude_array.include?(a_url_parsed.request_uri)
+							puts "Excluding page: #{a_url_parsed.request_uri}" if verbose
 							allow = false
 						end
 
