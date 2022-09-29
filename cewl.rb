@@ -169,7 +169,11 @@ class MySpiderInstance<SpiderInstance
 
 				y = []
 				x.select do |a_url, parsed_url|
-					y << [a_url, parsed_url] if allowable_url?(a_url, parsed_url)
+                    puts parsed_url.inspect
+                    puts parsed_url.scheme.inspect
+                    if (parsed_url.scheme == "http" or parsed_url.scheme == "https") then
+                      y << [a_url, parsed_url] if allowable_url?(a_url, parsed_url)
+                    end
 				end
 
 				y.each do |a_url, parsed_url|
