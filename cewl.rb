@@ -17,7 +17,7 @@
 # Licence:: CC-BY-SA 2.0 or GPL-3+
 #
 
-VERSION = "5.5.2 (Grouping)"
+VERSION = "6.0 (Version Sync)"
 
 puts "CeWL #{VERSION} Robin Wood (robin@digi.ninja) (https://digi.ninja/)\n"
 
