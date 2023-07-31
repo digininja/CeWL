@@ -17,7 +17,7 @@
 # Licence:: CC-BY-SA 2.0 or GPL-3+
 #
 
-VERSION = "6.0 (Version Sync)"
+VERSION = "6.1 (Max Length)"
 
 puts "CeWL #{VERSION} Robin Wood (robin@digi.ninja) (https://digi.ninja/)\n"
 
@@ -469,6 +469,7 @@ opts = GetoptLong.new(
 		['--keep', '-k', GetoptLong::NO_ARGUMENT],
 		['--depth', '-d', GetoptLong::REQUIRED_ARGUMENT],
 		['--min_word_length', "-m", GetoptLong::REQUIRED_ARGUMENT],
+		['--max_word_length', "-x", GetoptLong::REQUIRED_ARGUMENT],
 		['--no-words', "-n", GetoptLong::NO_ARGUMENT],
 		['--groups', "-g", GetoptLong::REQUIRED_ARGUMENT],
 		['--offsite', "-o", GetoptLong::NO_ARGUMENT],
@@ -506,6 +507,7 @@ def usage
 	-k, --keep: Keep the downloaded file.
 	-d <x>,--depth <x>: Depth to spider to, default 2.
 	-m, --min_word_length: Minimum word length, default 3.
+	-x, --max_word_length: Maximum word length, default unset.
 	-o, --offsite: Let the spider visit other sites.
 	--exclude: A file containing a list of paths to exclude
 	--allowed: A regex pattern that path must match to be followed
@@ -557,6 +559,7 @@ exclude_array = []
 allowed_pattern = nil
 depth = 2
 min_word_length = 3
+max_word_length = -1
 email = false
 meta = false
 wordlist = true
@@ -623,6 +626,9 @@ begin
 				email_outfile = arg
 			when "--email"
 				email = true
+			when '--max_word_length'
+				max_word_length = arg.to_i
+				usage if max_word_length < 1
 			when '--min_word_length'
 				min_word_length = arg.to_i
 				usage if min_word_length < 1
@@ -1018,7 +1024,7 @@ catch :ctrl_c do
 							# Add to the array
 							group_words = []
 							words.split(" ").each do |word|
-								if word.length >= min_word_length
+								if word.length >= min_word_length and (max_word_length == -1 or word.length <= max_word_length)
 									word_hash[word] = 0 if !word_hash.has_key?(word)
 									word_hash[word] += 1
 								end
