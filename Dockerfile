@@ -1,4 +1,4 @@
-FROM ruby:2.5-alpine
+FROM ruby:3-alpine
 
 ENV RUBYOPT "rubygems"
 
