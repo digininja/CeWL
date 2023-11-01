@@ -5,6 +5,7 @@ ENV RUBYOPT "rubygems"
 COPY Gemfile /usr/src/CeWL/
 WORKDIR /usr/src/CeWL
 
+RUN apk add gcompat
 RUN set -ex \
     && apk add  --no-cache --virtual .build-deps build-base \
     && gem install bundler \
