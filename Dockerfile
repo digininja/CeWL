@@ -2,8 +2,8 @@ FROM ruby:3-alpine
 
 ENV RUBYOPT "rubygems"
 
-COPY Gemfile /usr/src/CeWl/
-WORKDIR /usr/src/CeWl
+COPY Gemfile /usr/src/CeWL/
+WORKDIR /usr/src/CeWL
 
 RUN set -ex \
     && apk add  --no-cache --virtual .build-deps build-base \
