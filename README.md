@@ -107,7 +107,7 @@ Usage: cewl [OPTIONS] ... <url>
 
 ### Running CeWL in a Docker container
 
-To quickly use CeWL on your machine with Docker, you can use the official `ghcr.io/digininja/cewl` image:
+To quickly use CeWL with Docker, you can use the official `ghcr.io/digininja/cewl` image:
 
 ```sh
 docker run -it --rm -v "${PWD}:/host" ghcr.io/digininja/cewl [OPTIONS] ... <url>
