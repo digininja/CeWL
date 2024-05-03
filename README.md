@@ -107,20 +107,17 @@ Usage: cewl [OPTIONS] ... <url>
 
 ### Running CeWL in a Docker container
 
-To quickly use CeWL on your machine with Docker, you have to build it :
-1. Build the container :
-    ```sh
-    docker build -t cewl .
-    ```
-2. Container usage without interacting with local files :
-    ```sh
-    docker run -it --rm cewl [OPTIONS] ... <url>
-    ```
-3. Container usage with local files as input or output :
-    ```sh
-    # you have to mount the current directory when calling the container 
-    docker run -it --rm -v "${PWD}:/host" cewl [OPTIONS] ... <url>
-    ```
+To quickly use CeWL on your machine with Docker, you can use the official `ghcr.io/digininja/cewl` image:
+
+```sh
+docker run -it --rm -v "${PWD}:/host" ghcr.io/digininja/cewl [OPTIONS] ... <url>
+```
+
+You can also build it locally:
+```sh
+docker build -t cewl .
+docker run -it --rm -v "${PWD}:/host" cewl [OPTIONS] ... <url>
+```
 
 I am going to stress here, I am not going to be offering any support for this. The work was done by [@loris-intergalactique](https://github.com/loris-intergalactique) who has offered to field any questions on it and give support. I don't use or know Docker, so please, don't ask me for help.
 
