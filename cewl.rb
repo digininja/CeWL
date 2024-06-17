@@ -169,7 +169,7 @@ class MySpiderInstance<SpiderInstance
 
 				y = []
 				x.select do |a_url, parsed_url|
-                    if (parsed_url.scheme == "http" or parsed_url.scheme == "https") then
+                    if (parsed_url.scheme == "mailto" or parsed_url.scheme == "http" or parsed_url.scheme == "https") then
                       y << [a_url, parsed_url] if allowable_url?(a_url, parsed_url)
                     end
 				end
