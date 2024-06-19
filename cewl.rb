@@ -771,7 +771,7 @@ else
 	email_outfile_file = outfile_file
 end
 
-if meta_outfile && email
+if meta_outfile && meta
 	begin
 		meta_outfile_file = File.new(meta_outfile, "w")
 	rescue
