@@ -169,7 +169,7 @@ class MySpiderInstance<SpiderInstance
 
 				y = []
 				x.select do |a_url, parsed_url|
-                    if (parsed_url.scheme == "http" or parsed_url.scheme == "https") then
+                    if (parsed_url.scheme == "mailto" or parsed_url.scheme == "http" or parsed_url.scheme == "https") then
                       y << [a_url, parsed_url] if allowable_url?(a_url, parsed_url)
                     end
 				end
@@ -440,7 +440,7 @@ class Tree
 
 	# Push an item onto the tree
 	def push(value)
-		puts "Pushing #{value}" if @debug
+		puts "Adding #{value} to the tree" if @debug
 		key = value.keys.first
 		value = value.values_at(key).first
 
@@ -454,10 +454,21 @@ class Tree
 				@children << child
 			else
 				@children.each { |node|
-					if node.data.value == key && node.data.depth<@max_depth
-						child = Tree.new(key, value, node.data.depth + 1, @debug)
-						@children << child
-					end
+                    # Ignore the max depth for mailto links.
+                    # This is not a good way to do this, but it will work for now
+                    # and we all know dirty hacks stay around forever so don't
+                    # expect this to be fixed for a while.
+                    if value =~ /^mailto:/ then
+                      if node.data.value == key then
+                          child = Tree.new(key, value, node.data.depth + 1, @debug)
+                          @children << child
+                      end
+                    else
+                      if node.data.value == key && node.data.depth<@max_depth then
+                          child = Tree.new(key, value, node.data.depth + 1, @debug)
+                          @children << child
+                      end
+                    end
 				}
 			end
 		end

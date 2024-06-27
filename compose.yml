@@ -1,0 +1,4 @@
+services:
+  cewl:
+    build: .
+    image: ghcr.io/digininja/cewl:latest
