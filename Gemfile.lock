@@ -19,7 +19,7 @@ GEM
     nokogiri (1.16.5-x86_64-linux)
       racc (~> 1.4)
     racc (1.8.0)
-    rexml (3.3.2)
+    rexml (3.3.6)
       strscan
     rubyzip (2.3.2)
     spider (0.5.4)
