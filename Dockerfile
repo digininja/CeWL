@@ -1,6 +1,6 @@
 FROM ruby:3-alpine
 
-ENV RUBYOPT "rrubygems"
+ENV RUBYOPT="rrubygems"
 
 COPY Gemfile /usr/src/CeWL/
 WORKDIR /usr/src/CeWL
