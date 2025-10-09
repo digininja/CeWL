@@ -1,5 +1,7 @@
 FROM ruby:3-alpine
 
+LABEL org.opencontainers.image.description A docker image to help users run CeWL without having to install all the Ruby dependencies.
+
 ENV RUBYOPT="rrubygems"
 
 COPY Gemfile /usr/src/CeWL/
