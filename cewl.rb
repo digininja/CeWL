@@ -26,6 +26,7 @@ begin
 	require 'spider'
 	require 'nokogiri'
 	require 'net/http'
+    require "cgi"
 rescue LoadError => e
 	# Catch error and provide feedback on installing gem
 	if e.to_s =~ /cannot load such file -- (.*)/
@@ -989,8 +990,8 @@ catch :ctrl_c do
 					# Strip html tags
 					words = body.gsub(/<\/?[^>]*>/, "")
 
-					# Check if this is needed
-					words.gsub!(/&[a-z]*;/, "")
+                    # Decode HTML entities
+                    words = CGI.unescapeHTML(words)
 
 					begin
 						#if file_extension !~ /^((doc|dot|ppt|pot|xls|xlt|pps)[xm]?)|(ppam|xlsb|xlam|pdf|zip|gz|zip|bz2|css|png|gif|jpg|#)$/
