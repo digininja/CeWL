@@ -107,7 +107,6 @@ Usage: cewl [OPTIONS] ... <url>
 
 ### Running CeWL in a Docker container
 
-
 To quickly use CeWL with Docker, you can use the official `ghcr.io/digininja/cewl` image:
 
 ```sh
@@ -120,7 +119,7 @@ docker build -t cewl .
 docker run -it --rm -v "${PWD}:/host" cewl [OPTIONS] ... <url>
 ```
 
-I am going to stress here, I am not going to be offering any support for this. The work was done by [@loris-intergalactique](https://github.com/loris-intergalactique) who has offered to field any questions on it and give support. I don't use or know Docker, so please, don't ask me for help.
+If you want to see this in action, check out my video [Running CeWL in Docker on Kali](https://www.youtube.com/watch?v=8UeKigZdHdE).
 
 ## Licence
 
