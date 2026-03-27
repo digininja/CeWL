@@ -9,6 +9,7 @@
 # * A list of all email addresses found in mailto links
 # * A list of usernames/author details from meta data found in any documents on the site
 # * Groups of words up to the specified group size
+# * URL paths, subdomains, and domains (with --capture-* options)
 #
 # URL: The site to spider.
 #
@@ -499,6 +500,9 @@ opts = GetoptLong.new(
 		['--convert-umlauts', GetoptLong::NO_ARGUMENT],
 		['--meta', "-a", GetoptLong::NO_ARGUMENT],
 		['--email', "-e", GetoptLong::NO_ARGUMENT],
+		['--capture-paths', GetoptLong::NO_ARGUMENT],
+		['--capture-subdomains', GetoptLong::NO_ARGUMENT],
+		['--capture-domain', GetoptLong::NO_ARGUMENT],
 		['--count', '-c', GetoptLong::NO_ARGUMENT],
 		['--auth_user', GetoptLong::REQUIRED_ARGUMENT],
 		['--auth_pass', GetoptLong::REQUIRED_ARGUMENT],
@@ -534,6 +538,9 @@ def usage
 	--convert-umlauts: Convert common ISO-8859-1 (Latin-1) umlauts (ä-ae, ö-oe, ü-ue, ß-ss)
 	-a, --meta: include meta data.
 	--meta_file file: Output file for meta data.
+	--capture-paths: Add URL path components to wordlist.
+	--capture-subdomains: Add subdomain components to wordlist.
+	--capture-domain: Add main domain to wordlist.
 	-e, --email: Include email addresses.
 	--email_file <file>: Output file for email addresses.
 	--meta-temp-dir <dir>: The temporary directory used by exiftool when parsing files, default /tmp.
@@ -585,6 +592,9 @@ words_with_numbers = false
 convert_umlauts = false
 show_count = false
 auth_type = nil
+capture_paths = false
+capture_subdomains = false
+capture_domain = false
 auth_user = nil
 auth_pass = nil
 
@@ -634,6 +644,15 @@ begin
 				meta_outfile = arg
 			when "--meta"
 				meta = true
+			when "--capture-paths"
+				capture_paths = true
+				puts "Will capture URL paths" if verbose
+			when "--capture-subdomains"
+				capture_subdomains = true
+				puts "Will capture subdomains" if verbose
+			when "--capture-domain"
+				capture_domain = true
+				puts "Will capture domain" if verbose
 			when "--groups"
 				groups = arg.to_i
 			when "--email_file"
@@ -728,6 +747,69 @@ end
 if ARGV.length != 1
 	puts "\nMissing URL argument (try --help)\n\n"
 	exit 1
+end
+
+# Function to extract path components from URL
+def extract_path_components(url, verbose=false)
+	components = []
+	begin
+		parsed = URI.parse(url)
+		if parsed.path && parsed.path != "/"
+			# Split path and filter out empty strings
+			path_parts = parsed.path.split('/').reject(&:empty?)
+			# Add each path component
+			path_parts.each do |part|
+				# Clean up the path part (remove extensions, parameters, etc.)
+				clean_part = part.gsub(/\?.*$/, '') # Remove query parameters
+				clean_part = clean_part.gsub(/\.[^.]*$/, '') # Remove file extension
+				clean_part = clean_part.gsub(/[^a-zA-Z0-9\-_]/, '') # Keep alphanumeric, dash, underscore
+				components << clean_part if clean_part.length >= 3
+				puts "Extracted path component: #{clean_part}" if verbose
+			end
+		end
+	rescue => e
+		puts "Error parsing URL #{url} for paths: #{e}" if verbose
+	end
+	components
+end
+
+# Function to extract subdomain components
+def extract_subdomain_components(url, verbose=false)
+	components = []
+	begin
+		parsed = URI.parse(url)
+		if parsed.host
+			host_parts = parsed.host.split('.')
+			# Remove TLD (last part) and domain (second last part)
+			if host_parts.length > 2
+				# Add each subdomain part
+				(0...host_parts.length-2).each do |i|
+					components << host_parts[i]
+					puts "Extracted subdomain component: #{host_parts[i]}" if verbose
+				end
+			end
+		end
+	rescue => e
+		puts "Error extracting subdomain from #{url}: #{e}" if verbose
+	end
+	components
+end
+
+# Function to extract domain
+def extract_domain(url, verbose=false)
+	begin
+		parsed = URI.parse(url)
+		if parsed.host
+			host_parts = parsed.host.split('.')
+			if host_parts.length >= 2
+				# Get domain + TLD (e.g., example.com)
+				return host_parts[-2..-1].join('.')
+			end
+		end
+	rescue => e
+		puts "Error extracting domain from #{url}: #{e}" if verbose
+	end
+	nil
 end
 
 url = ARGV.shift
@@ -931,6 +1013,46 @@ catch :ctrl_c do
 					end
 
 					puts body if debug
+
+					# Capture URL structure components if requested
+					if capture_paths || capture_subdomains || capture_domain
+						if capture_paths
+							path_components = extract_path_components(a_url, verbose)
+							path_components.each do |component|
+								if component.length >= min_word_length
+									if !word_hash.has_key?(component)
+										word_hash[component] = 0
+									end
+									word_hash[component] += 1
+									puts "Captured path component: #{component}" if verbose
+								end
+							end
+						end
+
+						if capture_subdomains
+							subdomain_components = extract_subdomain_components(a_url, verbose)
+							subdomain_components.each do |component|
+								if component.length >= min_word_length
+									if !word_hash.has_key?(component)
+										word_hash[component] = 0
+									end
+									word_hash[component] += 1
+									puts "Captured subdomain component: #{component}" if verbose
+								end
+							end
+						end
+
+						if capture_domain
+							domain = extract_domain(a_url, verbose)
+							if domain && domain.length >= min_word_length
+								if !word_hash.has_key?(domain)
+									word_hash[domain] = 0
+								end
+								word_hash[domain] += 1
+								puts "Captured domain: #{domain}" if verbose
+							end
+						end
+					end
 
 					# This bit will not normally fire as all JavaScript is stripped out
 					# by the Nokogiri remove a few lines before this.
