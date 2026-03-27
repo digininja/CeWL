@@ -503,6 +503,7 @@ opts = GetoptLong.new(
 		['--capture-paths', GetoptLong::NO_ARGUMENT],
 		['--capture-subdomains', GetoptLong::NO_ARGUMENT],
 		['--capture-domain', GetoptLong::NO_ARGUMENT],
+		['--capture-url-structure', GetoptLong::NO_ARGUMENT],
 		['--count', '-c', GetoptLong::NO_ARGUMENT],
 		['--auth_user', GetoptLong::REQUIRED_ARGUMENT],
 		['--auth_pass', GetoptLong::REQUIRED_ARGUMENT],
@@ -541,6 +542,7 @@ def usage
 	--capture-paths: Add URL path components to wordlist.
 	--capture-subdomains: Add subdomain components to wordlist.
 	--capture-domain: Add main domain to wordlist.
+	--capture-url-structure: Capture domain, paths, and subdomains (all URL structure).
 	-e, --email: Include email addresses.
 	--email_file <file>: Output file for email addresses.
 	--meta-temp-dir <dir>: The temporary directory used by exiftool when parsing files, default /tmp.
@@ -595,6 +597,7 @@ auth_type = nil
 capture_paths = false
 capture_subdomains = false
 capture_domain = false
+capture_url_structure = false
 auth_user = nil
 auth_pass = nil
 
@@ -653,6 +656,12 @@ begin
 			when "--capture-domain"
 				capture_domain = true
 				puts "Will capture domain" if verbose
+			when "--capture-url-structure"
+				capture_url_structure = true
+				capture_paths = true
+				capture_subdomains = true
+				capture_domain = true
+				puts "Will capture all URL structure (domain, paths, subdomains)" if verbose
 			when "--groups"
 				groups = arg.to_i
 			when "--email_file"
