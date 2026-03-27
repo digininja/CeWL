@@ -53,10 +53,35 @@ gem install xxx
 
 The gem `mini_exiftool` gem also requires the exiftool application to be installed.
 
-Assuming you cloned the GitHub repo, the script should by executable by default, but if not, you can make it executable with:
+## Installing CeWL
 
+1. **Clone the repository:**
+```bash
+git clone https://github.com/digininja/CeWL.git
+cd CeWL
 ```
+2. **Install dependencies:**
+```bash
+bundle install
+```
+3. **Make the script executable:**
+```bash
 chmod u+x ./cewl.rb
+```
+4. **Make CeWL available system-wide (optional):**
+
+Create a symlink
+```bash
+sudo ln -s $(pwd)/cewl.rb /usr/local/bin/cewl
+```
+5. **Verify Installation**
+Run the following checks to ensure CeWL is working correctly:
+
+```bash
+# Check if the script runs (should show version and usage)
+./cewl.rb --version
+# If you created a symlink or added to PATH, test the cewl command
+cewl --version
 ```
 
 The project page on my site gives some tips on solving common problems people
@@ -65,42 +90,51 @@ have encountered while running CeWL - https://digi.ninja/projects/cewl.php
 ## Usage
 
 ```
-./cewl.rb
+./cewl.rb --help
+# OR
+cewl --help
 
-CeWL 5.5.2 (Grouping) Robin Wood (robin@digi.ninja) (https://digi.ninja/)
+CeWL 6.2.1 (More Fixes) Robin Wood (robin@digi.ninja) (https://digi.ninja/)
 Usage: cewl [OPTIONS] ... <url>
 
     OPTIONS:
-	-h, --help: Show help.
-	-k, --keep: Keep the downloaded file.
-	-d <x>,--depth <x>: Depth to spider to, default 2.
-	-m, --min_word_length: Minimum word length, default 3.
-	-o, --offsite: Let the spider visit other sites.
-	-w, --write: Write the output to the file.
-	-u, --ua <agent>: User agent to send.
-	-n, --no-words: Don't output the wordlist.
-	-a, --meta: include meta data.
-	--meta_file file: Output file for meta data.
-	-e, --email: Include email addresses.
-	--email_file <file>: Output file for email addresses.
-	--meta-temp-dir <dir>: The temporary directory used by exiftool when parsing files, default /tmp.
-	-c, --count: Show the count for each word found.
-	-v, --verbose: Verbose.
-	--debug: Extra debug information.
+        -h, --help: Show help.
+        -k, --keep: Keep the downloaded file.
+        -d <x>,--depth <x>: Depth to spider to, default 2.
+        -m, --min_word_length: Minimum word length, default 3.
+        -x, --max_word_length: Maximum word length, default unset.
+        -o, --offsite: Let the spider visit other sites.
+        --exclude: A file containing a list of paths to exclude
+        --allowed: A regex pattern that path must match to be followed
+        -w, --write: Write the output to the file.
+        -u, --ua <agent>: User agent to send.
+        -n, --no-words: Don't output the wordlist.
+        -g <x>, --groups <x>: Return groups of words as well
+        --lowercase: Lowercase all parsed words
+        --with-numbers: Accept words with numbers in as well as just letters
+        --convert-umlauts: Convert common ISO-8859-1 (Latin-1) umlauts (ä-ae, ö-oe, ü-ue, ß-ss)
+        -a, --meta: include meta data.
+        --meta_file file: Output file for meta data.
+        -e, --email: Include email addresses.
+        --email_file <file>: Output file for email addresses.
+        --meta-temp-dir <dir>: The temporary directory used by exiftool when parsing files, default /tmp.
+        -c, --count: Show the count for each word found.
+        -v, --verbose: Verbose.
+        --debug: Extra debug information.
 
-	Authentication
-	--auth_type: Digest or basic.
-	--auth_user: Authentication username.
-	--auth_pass: Authentication password.
+        Authentication
+        --auth_type: Digest or basic.
+        --auth_user: Authentication username.
+        --auth_pass: Authentication password.
 
-	Proxy Support
-	--proxy_host: Proxy host.
-	--proxy_port: Proxy port, default 8080.
-	--proxy_username: Username for proxy, if required.
-	--proxy_password: Password for proxy, if required.
+        Proxy Support
+        --proxy_host: Proxy host.
+        --proxy_port: Proxy port, default 8080.
+        --proxy_username: Username for proxy, if required.
+        --proxy_password: Password for proxy, if required.
 
-	Headers
-	--header, -H: In format name:value - can pass multiple.
+        Headers
+        --header, -H: In format name:value - can pass multiple.
 
     <url>: The site to spider.
 ```
