@@ -24,6 +24,7 @@ puts "CeWL #{VERSION} Robin Wood (robin@digi.ninja) (https://digi.ninja/)\n"
 
 begin
 	require 'getoptlong'
+        require 'public_suffix'
 	require 'spider'
 	require 'nokogiri'
 	require 'net/http'
@@ -788,13 +789,30 @@ def extract_subdomain_components(url, verbose=false)
 	begin
 		parsed = URI.parse(url)
 		if parsed.host
-			host_parts = parsed.host.split('.')
-			# Remove TLD (last part) and domain (second last part)
-			if host_parts.length > 2
-				# Add each subdomain part
-				(0...host_parts.length-2).each do |i|
-					components << host_parts[i]
-					puts "Extracted subdomain component: #{host_parts[i]}" if verbose
+			begin
+				# Use public_suffix to properly parse the domain structure
+				parsed_host = PublicSuffix.parse(parsed.host)
+				
+				# Get the full host and split it
+				host_parts = parsed.host.split('.')
+				domain_parts = parsed_host.domain.split('.')
+				
+				# Subdomains are everything before the domain
+				subdomain_count = host_parts.length - domain_parts.length
+				if subdomain_count > 0
+					(0...subdomain_count).each do |i|
+						components << host_parts[i]
+						puts "Extracted subdomain component: #{host_parts[i]}" if verbose
+					end
+				end
+			rescue PublicSuffix::DomainInvalid => e
+				# Fallback to simple method if parsing fails
+				host_parts = parsed.host.split('.')
+				if host_parts.length > 2
+					(0...host_parts.length-2).each do |i|
+						components << host_parts[i]
+						puts "Extracted subdomain component: #{host_parts[i]}" if verbose
+					end
 				end
 			end
 		end
@@ -809,10 +827,16 @@ def extract_domain(url, verbose=false)
 	begin
 		parsed = URI.parse(url)
 		if parsed.host
-			host_parts = parsed.host.split('.')
-			if host_parts.length >= 2
-				# Get domain + TLD (e.g., example.com)
-				return host_parts[-2..-1].join('.')
+			begin
+				# Use public_suffix to get the registrable domain (handles co.uk, etc.)
+				parsed_host = PublicSuffix.parse(parsed.host)
+				return parsed_host.domain
+			rescue PublicSuffix::DomainInvalid => e
+				# Fallback to simple method if parsing fails
+				host_parts = parsed.host.split('.')
+				if host_parts.length >= 2
+					return host_parts[-2..-1].join('.')
+				end
 			end
 		end
 	rescue => e
