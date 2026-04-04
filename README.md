@@ -136,6 +136,12 @@ Usage: cewl [OPTIONS] ... <url>
         Headers
         --header, -H: In format name:value - can pass multiple.
 
+        URL Structure Capture
+        --capture-paths: Add URL path components to the wordlist.
+        --capture-subdomains: Add subdomain components to the wordlist.
+        --capture-domain: Add the main domain to the wordlist.
+        --capture-url-structure: Capture domain, paths, and subdomains (all URL structure).
+
     <url>: The site to spider.
 ```
 
