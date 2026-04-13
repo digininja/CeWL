@@ -1,2 +1,7 @@
 # Vim swap files
 .*.swp
+
+# Playing with Sonarqube and don't want it in the repo
+
+.scannerwork/
+sonar-project.properties
