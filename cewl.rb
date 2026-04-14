@@ -14,7 +14,7 @@
 # URL: The site to spider.
 #
 # Author:: Robin Wood (robin@digi.ninja)
-# Copyright:: Copyright (c) Robin Wood 2018
+# Copyright:: Copyright (c) Robin Wood 2026
 # Licence:: CC-BY-SA 2.0 or GPL-3+
 #
 
