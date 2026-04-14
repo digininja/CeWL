@@ -1034,16 +1034,12 @@ catch :ctrl_c do
 					dom.css('style').remove if strip_css
 					body = dom.to_s
 
-					# Get meta data
-					if /.*<meta.*description.*content\s*=[\s'"]*(.*)/i.match(body)
-						description = $1
-						body += description.gsub(/[>"\/']*/, "")
-					end
+					# Pull structured meta content from the DOM
+					description = dom.at_xpath("//meta[translate(@name, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')='description']/@content")&.text
+					keywords = dom.at_xpath("//meta[translate(@name, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')='keywords']/@content")&.text
 
-					if /.*<meta.*keywords.*content\s*=[\s'"]*(.*)/i.match(body)
-						keywords = $1
-						body += keywords.gsub(/[>"\/']*/, "")
-					end
+					body += " #{description}" if description && !description.empty?
+					body += " #{keywords}" if keywords && !keywords.empty?
 
 					puts body if debug
 
