@@ -515,6 +515,8 @@ opts = GetoptLong.new(
 		['--proxy_username', GetoptLong::REQUIRED_ARGUMENT],
 		['--proxy_password', GetoptLong::REQUIRED_ARGUMENT],
 		["--verbose", "-v", GetoptLong::NO_ARGUMENT],
+		["--keep-js", GetoptLong::NO_ARGUMENT],
+		["--keep-css", GetoptLong::NO_ARGUMENT],
 		["--debug", GetoptLong::NO_ARGUMENT]
 )
 
@@ -549,6 +551,8 @@ def usage
 	--meta-temp-dir <dir>: The temporary directory used by exiftool when parsing files, default /tmp.
 	-c, --count: Show the count for each word found.
 	-v, --verbose: Verbose.
+	--keep-js: By default all JavaScript is removed, use this to keep it
+	--keep-css: By default all CSS is removed, use this to keep it
 	--debug: Extra debug information.
 
 	Authentication
@@ -625,6 +629,10 @@ begin
 				words_with_numbers = true
 			when "--convert-umlauts"
 				convert_umlauts = true
+			when "--keep-css"
+				strip_css = false
+			when "--keep-js"
+				strip_js = false
 			when "--count"
 				show_count = true
 			when "--meta-temp-dir"
@@ -1097,17 +1105,12 @@ catch :ctrl_c do
 						re = Regexp.escape(full_match)
 						body.gsub!(/#{re}/, "")
 
-						if j_url !~ /https?:\/\//i
-							parsed = URI.parse(a_url)
-							protocol = parsed.scheme
-							host = parsed.host
-
-							domain = "#{protocol}://#{host}"
-
-							j_url = domain + j_url
-							j_url += $1 if j_url[0] == "/" && parsed.path =~ /(.*)\/.*/
-
-							puts "Relative URL found, adding domain to make #{j_url}" if verbose
+						begin
+							j_url = URI.join(a_url, j_url).to_s
+							puts "Resolved redirect to #{j_url}" if verbose
+						rescue URI::InvalidURIError => e
+							puts "Invalid Javascript redirect URL #{j_url} on #{a_url}" if verbose
+							next
 						end
 
 						x = {a_url => j_url}
