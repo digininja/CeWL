@@ -18,7 +18,7 @@
 # Licence:: CC-BY-SA 2.0 or GPL-3+
 #
 
-VERSION = "6.2.1 (More Fixes)"
+VERSION = "6.3.0 (Big Fixes)"
 
 puts "CeWL #{VERSION} Robin Wood (robin@digi.ninja) (https://digi.ninja/)\n"
 
@@ -295,25 +295,14 @@ class MySpiderInstance<SpiderInstance
 	end
 
 	# Overriding so that I can get it to ignore direct names - i.e. #name
-	def construct_complete_url(base_url, additional_url, parsed_additional_url = nil) #:nodoc:
+	def construct_complete_url(base_url, additional_url) #:nodoc:
 		return nil if additional_url =~ /^#/
 
-		parsed_additional_url ||= URI.parse(additional_url)
-		if parsed_additional_url.scheme.nil?
-			u = base_url.is_a?(URI) ? base_url : URI.parse(base_url)
-			if additional_url[0].chr == '/'
-				url = "#{u.scheme}://#{u.host}:#{u.port}#{additional_url}"
-			elsif u.path.nil? || u.path == ''
-				url = "#{u.scheme}://#{u.host}:#{u.port}/#{additional_url}"
-			elsif u.path[0].chr == '/'
-				url = "#{u.scheme}://#{u.host}:#{u.port}#{u.path}/#{additional_url}"
-			else
-				url = "#{u.scheme}://#{u.host}:#{u.port}/#{u.path}/#{additional_url}"
-			end
-		else
-			url = additional_url
+		begin
+			URI.join(base_url.to_s, additional_url).to_s
+		rescue URI::InvalidURIError
+			nil
 		end
-		return url
 	end
 
 	# Overriding the original spider one as it doesn't find hrefs very well
@@ -340,8 +329,8 @@ class MySpiderInstance<SpiderInstance
 					nil
 				else
 					begin
-						parsed_link = URI.parse(link)
-						parsed_link.fragment == '#' ? nil : construct_complete_url(base_url, link, parsed_link)
+							parsed_link = URI.parse(link)
+							parsed_link.fragment == '#' ? nil : construct_complete_url(base_url, link)
 					rescue
 						nil
 					end
