@@ -1161,10 +1161,15 @@ catch :ctrl_c do
 								# I've put it in here as some docs contain email addresses that have nothing to do with the target
 								# so give false positive type results
 								words.each_line do |word|
-									while /\b([A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4})\b/i.match(word)
-										puts "Found #{$1} on page #{a_url}" if verbose
-										email_arr << $1
-										word = word.gsub(/#{$1}/, "")
+									email_regex = /\b[-A-Z0-9._%+]+@(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+[A-Z]{2,63}\b/i
+
+									words.each_line do |word|
+										while (match = email_regex.match(word))
+											email = match[0]
+											puts "Found #{email} on page #{a_url}" if verbose
+											email_arr << email
+											word = word.sub(email, "")
+										end
 									end
 								end
 							end
