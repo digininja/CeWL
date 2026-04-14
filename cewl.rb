@@ -1141,8 +1141,8 @@ catch :ctrl_c do
 					# Strip html tags
 					words = body.gsub(/<\/?[^>]*>/, "")
 
-                    # Decode HTML entities
-                    words = CGI.unescapeHTML(words)
+					# Decode HTML entities
+					words = CGI.unescapeHTML(words)
 
 					begin
 						#if file_extension !~ /^((doc|dot|ppt|pot|xls|xlt|pps)[xm]?)|(ppam|xlsb|xlam|pdf|zip|gz|zip|bz2|css|png|gif|jpg|#)$/
@@ -1156,16 +1156,14 @@ catch :ctrl_c do
 								# this block outside the if statement
 								# I've put it in here as some docs contain email addresses that have nothing to do with the target
 								# so give false positive type results
-								words.each_line do |word|
-									email_regex = /\b[-A-Z0-9._%+]+@(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+[A-Z]{2,63}\b/i
+								email_regex = /\b[-A-Z0-9._%+]+@(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+[A-Z]{2,63}\b/i
 
-									words.each_line do |word|
-										while (match = email_regex.match(word))
-											email = match[0]
-											puts "Found #{email} on page #{a_url}" if verbose
-											email_arr << email
-											word = word.sub(email, "")
-										end
+								words.each_line do |word|
+									while (match = email_regex.match(word))
+										email = match[0]
+										puts "Found #{email} on page #{a_url}" if verbose
+										email_arr << email
+										word = word.sub(email, "")
 									end
 								end
 							end
