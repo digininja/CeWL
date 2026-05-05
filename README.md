@@ -35,8 +35,10 @@ CeWL needs the following gems to be installed:
 * mime-types
 * mini_exiftool
 * nokogiri
+* public_suffix
 * rubyzip
 * spider
+* getoptlong
 
 The easiest way to install these gems is with Bundler:
 
