@@ -18,7 +18,7 @@
 # Licence:: CC-BY-SA 2.0 or GPL-3+
 #
 
-VERSION = "6.3.0 (Big Fixes)"
+VERSION = "6.3.1 (GetOptLong Deps)"
 
 puts "CeWL #{VERSION} Robin Wood (robin@digi.ninja) (https://digi.ninja/)\n"
 
