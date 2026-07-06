@@ -1,0 +1,15 @@
+root = true
+
+[*]
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+charset = utf-8
+
+[*.{rb,gemspec,yml,yaml,json,md}]
+indent_style = space
+indent_size = 2
+
+[Gemfile]
+indent_style = space
+indent_size = 2
